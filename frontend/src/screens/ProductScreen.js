@@ -2,7 +2,6 @@ import React from "react";
 import { LinkContainer } from "react-router-bootstrap";
 import { Row, Col, Image, ListGroup, Card, Button } from "react-bootstrap";
 import Rating from "../components/Rating";
-import Products from "../products";
 import products from "../products";
 const ProductScreen = ({ match }) => {
   const product = products.find((product) => product._id === match.params.id);
