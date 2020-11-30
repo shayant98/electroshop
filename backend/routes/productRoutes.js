@@ -9,7 +9,7 @@ const Product = require("../models/productModel");
 router.get(
   "/",
   asyncHandler(async (req, res, next) => {
-    const products = await Product.find({});
+    const products = await Product.find();
     res.json(products);
   })
 );
