@@ -10,9 +10,9 @@ export const cartReducer = (state = { cartItems: [] }, action) => {
 
       if (existsItem) {
         return {
-          ...state, //WAARVOOR DIT?
-          cartItems: state.cartItems.map((item) =>
-            item.product === existsItem.product ? item : item
+          ...state,
+          cartItems: state.cartItems.map((x) =>
+          x.product === existsItem.product ? item : x
           ),
         };
       } else {
@@ -21,12 +21,13 @@ export const cartReducer = (state = { cartItems: [] }, action) => {
           cartItems: [...state.cartItems, item],
         };
       }
-      break;
     case CART_REMOVE_ITEM:
-      break;
+      return {
+        ...state,
+        cartItems: state.cartItems.filter((x) => x.product !== action.payload),
+      }
 
     default:
       return state;
-      break;
   }
 };

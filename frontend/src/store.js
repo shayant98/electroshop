@@ -18,9 +18,10 @@ const reducer = combineReducers({
 
 const initialState = {
   cart: {
-    cartItemss: cartItemsFromStorage
+    cartItems: cartItemsFromStorage
   }
 };
+
 const middleware = [thunk];
 
 const store = createStore(

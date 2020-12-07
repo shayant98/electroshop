@@ -51,7 +51,7 @@ const ProductScreen = ({ match, history }) => {
       {loading ? (
         <Loader />
       ) : error ? (
-        <Message variant="danger">{error}</Message>
+        <Message variant="danger" value={error}></Message>
       ) : (
         <Row>
           <Col md={6}>
