@@ -12,15 +12,17 @@ const PlaceOrderScreen = () => {
   const cart = useSelector((state) => state.cart);
   const { cartItems, shippingAddress, paymentMethod } = cart;
 
-  const itemsPrice = cartItems.reduce(
+  cart.itemsPrice = cartItems.reduce(
     (acc, item) => acc + item.price * item.qty,
     0
   );
 
-  const shippingPrice = itemsPrice > 100 ? 0 : 750;
-  const taxPrice = Number(0.15 * itemsPrice).toFixed(2);
-  const totalPrice =
-    Number(itemsPrice) + Number(shippingPrice) + Number(taxPrice);
+  cart.shippingPrice = cart.itemsPrice > 100 ? 0 : 750;
+  cart.taxPrice = Number(0.15 * cart.itemsPrice).toFixed(2);
+  cart.totalPrice =
+    Number(cart.itemsPrice) +
+    Number(cart.shippingPrice) +
+    Number(cart.taxPrice);
 
   return (
     <>
@@ -84,25 +86,25 @@ const PlaceOrderScreen = () => {
               <ListGroup.Item>
                 <Row>
                   <Col>Items:</Col>
-                  <Col>${itemsPrice}</Col>
+                  <Col>${cart.itemsPrice}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
                 <Row>
                   <Col>Shipping:</Col>
-                  <Col>${shippingPrice}</Col>
+                  <Col>${cart.shippingPrice}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
                 <Row>
                   <Col>Tax:</Col>
-                  <Col>${taxPrice}</Col>
+                  <Col>${cart.taxPrice}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
                 <Row>
                   <Col>Total:</Col>
-                  <Col>${totalPrice}</Col>
+                  <Col>${cart.totalPrice}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
