@@ -6,7 +6,7 @@ const Footer = () => {
     <footer>
       <Container>
         <Row>
-          <Col className="text-center py-3">Copyright reactshop</Col>
+          <Col className="text-center py-3">Copyright ELECTROSHOP</Col>
         </Row>
       </Container>
     </footer>

@@ -1,7 +1,7 @@
 {
-  "name": "shop",
+  "name": "electroshop",
   "version": "1.0.0",
-  "description": "",
+  "description": "a webshop application built from the ground up on the MERN stack",
   "main": "server.js",
   "scripts": {
     "start": "node backend/server",
