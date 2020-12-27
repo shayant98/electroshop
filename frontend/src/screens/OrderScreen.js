@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Button, Row, Col, ListGroup, Image, Card } from "react-bootstrap";
+import { Row, Col, ListGroup, Image, Card } from "react-bootstrap";
 import Message from "../components/Message";
 import { useDispatch, useSelector } from "react-redux";
 import Loader from "../components/Loader";
-import { getOrderDetails, payOrder, resetOrder } from "../actions/orderActions";
+import { getOrderDetails, payOrder } from "../actions/orderActions";
 import { Link } from "react-router-dom";
 import { PayPalButton } from "react-paypal-button-v2";
 import axios from "axios";
