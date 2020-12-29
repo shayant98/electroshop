@@ -71,13 +71,15 @@ const UserListScreen = ({ history }) => {
                       <i className="fas fa-edit" />
                     </Button>
                   </LinkContainer>
-                  <Button
-                    variant="danger"
-                    className="btn-sm"
-                    onClick={() => deleteHandler(user._id)}
-                  >
-                    <i className="fas fa-trash" />
-                  </Button>
+                  {user._id !== userInfo._id && (
+                    <Button
+                      variant="danger"
+                      className="btn-sm"
+                      onClick={() => deleteHandler(user._id)}
+                    >
+                      <i className="fas fa-trash" />
+                    </Button>
+                  )}
                 </td>
               </tr>
             ))}
