@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import {
-  listProductDetails,
-  createProductReview,
-} from "../actions/productActions";
+import { listProductDetails } from "../actions/productActions";
 import { LinkContainer } from "react-router-bootstrap";
 
 import {
@@ -19,49 +16,31 @@ import {
 import Message from "../components/Message";
 import Loader from "../components/Loader";
 import Rating from "../components/Rating";
-import { PRODUCT_CREATE_REVIEW_RESET } from "../constants/productConstants";
 import Meta from "../components/Meta";
+import ReviewForm from "../components/ReviewForm";
+import { PRODUCT_CREATE_REVIEW_RESET } from "../constants/productConstants";
 
 const ProductScreen = ({ match, history }) => {
   const [qty, setQty] = useState(1);
-  const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState("");
 
   const dispatch = useDispatch();
 
   const productDetails = useSelector((state) => state.productDetails);
   const { loading, error, product } = productDetails;
 
-  const productCreateReview = useSelector((state) => state.productCreateReview);
-  const {
-    error: errorProductReview,
-    success: successProductReview,
-  } = productCreateReview;
-
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
+  const productCreateReview = useSelector((state) => state.productCreateReview);
+  const { success } = productCreateReview;
+
   useEffect(() => {
-    if (successProductReview) {
-      dispatch({ type: PRODUCT_CREATE_REVIEW_RESET });
-      setRating(0);
-      setComment("");
-    }
+    dispatch({ type: PRODUCT_CREATE_REVIEW_RESET });
     dispatch(listProductDetails(match.params.id));
-  }, [dispatch, match, successProductReview]);
+  }, [dispatch, match, success]);
 
   const addToCartHandler = () => {
     history.push(`/cart/${match.params.id}?qty=${qty}`);
-  };
-
-  const submitHandler = (e) => {
-    e.preventDefault();
-    dispatch(
-      createProductReview(match.params.id, {
-        rating,
-        comment,
-      })
-    );
   };
 
   return (
@@ -171,40 +150,7 @@ const ProductScreen = ({ match, history }) => {
               </ListGroup>
               <ListGroup.Item>
                 {userInfo ? (
-                  <>
-                    <h2>Write a Customer Review</h2>
-                    {errorProductReview && (
-                      <Message variant="danger">{errorProductReview}</Message>
-                    )}
-                    <Form onSubmit={submitHandler}>
-                      <Form.Group controlId="rating">
-                        <Form.Label>Rating</Form.Label>
-                        <Form.Control
-                          as="select"
-                          value={rating}
-                          onChange={(e) => setRating(e.target.value)}
-                        >
-                          <option value="">Select...</option>
-                          <option value="1">1 - Poor</option>
-                          <option value="2">2 - Fair</option>
-                          <option value="3">3 - Good</option>
-                          <option value="4">4 - Very good</option>
-                          <option value="5">5 - Excellent1</option>
-                        </Form.Control>
-                      </Form.Group>
-                      <Form.Group controlId="comment">
-                        <Form.Label>Comment</Form.Label>
-                        <Form.Control
-                          as="textarea"
-                          value={comment}
-                          onChange={(e) => setComment(e.target.value)}
-                        ></Form.Control>
-                      </Form.Group>
-                      <Button type="submit" variant="primary">
-                        Submit
-                      </Button>
-                    </Form>
-                  </>
+                  <ReviewForm productId={product._id} />
                 ) : (
                   <p>
                     <Link to="/login">Login</Link> to place a review

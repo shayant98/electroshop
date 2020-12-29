@@ -34,8 +34,8 @@ const ProfileScreen = ({ history }) => {
       history.push("/login");
     } else {
       if (!user.name) {
-        dispatch(listMyOrders());
         dispatch(getUserDetails("profile"));
+        dispatch(listMyOrders());
       } else {
         setName(user.name);
         setEmail(user.email);
@@ -66,7 +66,7 @@ const ProfileScreen = ({ history }) => {
           <Form.Group controlId="name">
             <Form.Label>Name</Form.Label>
             <Form.Control
-              type="name"
+              type="text"
               placeholder="Enter name"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -81,7 +81,7 @@ const ProfileScreen = ({ history }) => {
               onChange={(e) => setEmail(e.target.value)}
             ></Form.Control>
           </Form.Group>
-          <Form.Group controlId="email">
+          <Form.Group controlId="passwors">
             <Form.Label>Password</Form.Label>
             <Form.Control
               type="password"
@@ -111,18 +111,20 @@ const ProfileScreen = ({ history }) => {
         ) : errorOrders ? (
           <Message variant="danger">{errorOrders}</Message>
         ) : (
-          <Table striped bordered responsive clasName="table-sm">
+          <Table striped bordered responsive className="table-sm">
             <thead>
-              <th>ID</th>
-              <th>DATE</th>
-              <th>TOTAL</th>
-              <th>PAID</th>
-              <th>DELIVERED</th>
-              <th></th>
+              <tr>
+                <th>ID</th>
+                <th>DATE</th>
+                <th>TOTAL</th>
+                <th>PAID</th>
+                <th>DELIVERED</th>
+                <th></th>
+              </tr>
             </thead>
             <tbody>
               {orders.map((order) => (
-                <tr key={orderListMy._id}>
+                <tr key={order._id}>
                   <td>{order._id}</td>
                   <td>{order.createdAt.substring(0, 10)}</td>
                   <td>{order.totalPrice}</td>
