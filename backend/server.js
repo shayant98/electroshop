@@ -47,5 +47,7 @@ app.use(errorHandler);
 
 app.listen(
   process.env.PORT,
-  console.log(`running in ${process.env.NODE_ENV} mode on PORT: ${PORT}`)
+  console.log(
+    `running in ${process.env.NODE_ENV} mode on PORT: ${process.env.PORT}`
+  )
 );
