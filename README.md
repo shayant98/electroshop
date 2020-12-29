@@ -33,7 +33,7 @@ https://documenter.getpostman.com/view/7258943/TVt17j37
 
 ## Installation
 1. Install nodeJS https://nodejs.org
-2. Clone the repo `git clone`
+2. Clone the repo `git clone https://github.com/shayant98/electroshop.git`
 3. run `npm install` in the root for back-end packages
 4. run `npm install` in the 'frontend' folder for front-end packages
 4. add necessary variables to ENV
