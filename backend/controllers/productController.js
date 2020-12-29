@@ -5,16 +5,22 @@ const Product = require("../models/productModel");
 // @route GET /api/products
 // @access Public
 const getProducts = asyncHandler(async (req, res, next) => {
+  const pageSize = 10;
+  const page = Number(req.query.pageNumber) || 1;
   const keyword = req.query.keyword
     ? {
         name: {
           $regex: req.query.keyword,
-          $options: "i",
+          $options: "i", //case insensitive
         },
       }
     : {};
-  const products = await Product.find({ ...keyword });
-  res.json(products);
+
+  const count = await Product.countDocuments({ ...keyword });
+  const products = await Product.find({ ...keyword })
+    .limit(pageSize)
+    .skip(pageSize * (page - 1));
+  res.json({ products, page, pages: Math.ceil(count / pageSize) });
 });
 
 // @desc Fetch single products
