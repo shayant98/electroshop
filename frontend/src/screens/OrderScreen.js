@@ -188,7 +188,7 @@ const OrderScreen = ({ match }) => {
               </ListGroup.Item>
             </ListGroup>
           </Card>
-          {!order.isPaid && (
+          {!order.isPaid && userInfo._id === order.user._id && (
             <Col className="mt-3">
               {loadingPay && <Loader />}
               {!sdkReady ? (
