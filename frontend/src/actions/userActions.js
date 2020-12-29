@@ -26,6 +26,7 @@ import {
 } from "../constants/userConstants";
 import axios from "axios";
 import { ORDER_LIST_MY_RESET } from "../constants/orderConstants";
+import { CART_RESET } from "../constants/cartConstants";
 
 export const login = (email, password) => async (dispatch) => {
   try {
@@ -63,6 +64,10 @@ export const login = (email, password) => async (dispatch) => {
 };
 export const logout = () => (dispatch) => {
   localStorage.removeItem("userInfo");
+  localStorage.removeItem("cartItems");
+  localStorage.removeItem("shippingAddress");
+  localStorage.removeItem("paymentMethod");
+
   dispatch({ type: USER_LOGOUT });
   dispatch({
     type: USER_DETAILS_RESET,
@@ -72,6 +77,9 @@ export const logout = () => (dispatch) => {
   });
   dispatch({
     type: USER_LIST_RESET,
+  });
+  dispatch({
+    type: CART_RESET,
   });
 };
 
@@ -173,6 +181,7 @@ export const updateUserProfile = (user) => async (dispatch, getState) => {
       success: true,
       payload: data,
     });
+    localStorage.setItem("userInfo", JSON.stringify(data));
   } catch (error) {
     dispatch({
       type: USER_UPDATE_PROFILE_FAIL,
