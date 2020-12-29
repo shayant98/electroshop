@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "a webshop application built from the ground up on the MERN stack",
   "main": "server.js",
+  "engines": {
+    "node": "12.x"
+  },
   "scripts": {
     "start": "node backend/server",
     "server": "nodemon backend/server",
