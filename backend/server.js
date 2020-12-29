@@ -18,8 +18,6 @@ app.use(express.json());
 dotenv.config();
 connectDB();
 
-const PORT = 5000 || process.env.PORT;
-
 app.use("/api/products", productRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/orders", orderRoutes);
@@ -48,6 +46,6 @@ app.use(notFound);
 app.use(errorHandler);
 
 app.listen(
-  PORT,
+  process.env.PORT,
   console.log(`running in ${process.env.NODE_ENV} mode on PORT: ${PORT}`)
 );
