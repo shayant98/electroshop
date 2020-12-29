@@ -26,6 +26,9 @@ This project was built to enhance and learn more about the MERN-Stack with a pro
 
 ## API Reference
 
+Documentation regarding the API can be found here:
+https://documenter.getpostman.com/view/7258943/TVt17j37
+
 
 
 ## Installation
