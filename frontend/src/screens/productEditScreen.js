@@ -7,7 +7,10 @@ import Message from "../components/Message";
 import Loader from "../components/Loader";
 import FormContainer from "../components/FormContainer";
 import { listProductDetails, updateProduct } from "../actions/productActions";
-import { PRODUCT_UPDATE_RESET } from "../constants/productConstants";
+import {
+  PRODUCT_DETAILS_RESET,
+  PRODUCT_UPDATE_RESET,
+} from "../constants/productConstants";
 
 const ProductEditScreen = ({ match, history }) => {
   const productId = match.params.id;
@@ -20,6 +23,7 @@ const ProductEditScreen = ({ match, history }) => {
   const [countInStock, setCountInStock] = useState(0);
   const [description, setDescription] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [validationError, setValidationError] = useState("");
 
   const dispatch = useDispatch();
 
@@ -39,6 +43,7 @@ const ProductEditScreen = ({ match, history }) => {
   useEffect(() => {
     if (successUpdate) {
       dispatch({ type: PRODUCT_UPDATE_RESET });
+      dispatch({ type: PRODUCT_DETAILS_RESET });
       history.push("/admin/productlist");
     } else {
       if (!product || product._id !== productId) {
@@ -81,6 +86,12 @@ const ProductEditScreen = ({ match, history }) => {
 
   const submitHandler = (e) => {
     e.preventDefault();
+
+    if (countInStock < 0) {
+      setValidationError("Invalid stock");
+      return;
+    }
+
     dispatch(
       updateProduct({
         _id: productId,
@@ -104,6 +115,9 @@ const ProductEditScreen = ({ match, history }) => {
         <h1>Edit Product</h1>
         {loadingUpdate && <Loader />}
         {errorUpdate && <Message variant="danger">{errorUpdate}</Message>}
+        {validationError && (
+          <Message variant="danger">{validationError}</Message>
+        )}
         {loading ? (
           <Loader />
         ) : error ? (
