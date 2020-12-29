@@ -3,6 +3,7 @@ import axios from "axios";
 import {
   CART_ADD_ITEM,
   CART_REMOVE_ITEM,
+  CART_RESET,
   CART_SAVE_PAYMENT_METHOD,
   CART_SAVE_SHIPPING_ADDRESS,
 } from "../constants/cartConstants";
@@ -48,4 +49,11 @@ export const savePaymentMethod = (data) => (dispatch) => {
   });
 
   localStorage.setItem("paymentMethod", JSON.stringify(data));
+};
+
+export const emptyCart = () => (dispatch) => {
+  dispatch({
+    type: CART_RESET,
+  });
+  localStorage.removeItem("cartItems");
 };

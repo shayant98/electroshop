@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import CheckoutSteps from "../components/CheckoutSteps";
 import { createOrder } from "../actions/orderActions";
 import { Link } from "react-router-dom";
+import { emptyCart } from "../actions/cartActions";
 
 const PlaceOrderScreen = ({ history }) => {
   const dispatch = useDispatch();
@@ -27,9 +28,10 @@ const PlaceOrderScreen = ({ history }) => {
 
   useEffect(() => {
     if (success) {
+      dispatch(emptyCart());
       history.push(`/order/${order._id}`);
     }
-  }, [success, order, history]);
+  }, [dispatch, success, order, history]);
 
   const placeorderHandler = () => {
     dispatch(
