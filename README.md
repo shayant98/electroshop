@@ -37,6 +37,14 @@ This project was built to enhance and learn more about the MERN-Stack with a pro
 5. run `npm run dev` to startup a local DEV server
 
 
+### usage 
+admin account: admin@example.com
+password: 123456
+
+user account: shayant@example.com
+password: 123456
+
+
 ## Credits
 
 
