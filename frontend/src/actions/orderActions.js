@@ -17,7 +17,7 @@ import {
   ORDER_PAY_SUCCESS,
 } from "../constants/orderConstants";
 import axios from "axios";
-import { parseError } from "../utils/ParseError";
+import { USER_LOGOUT } from "../constants/userConstants";
 
 export const createOrder = (order) => async (dispatch, getState) => {
   try {
@@ -44,9 +44,16 @@ export const createOrder = (order) => async (dispatch, getState) => {
       payload: data,
     });
   } catch (error) {
+    const message =
+      error.response && error.response.data.message
+        ? error.response.data.message
+        : error.message;
+    if (message === "Not authorized, token failed") {
+      dispatch({ type: USER_LOGOUT });
+    }
     dispatch({
       type: ORDER_CREATE_FAIL,
-      payload: parseError(error),
+      payload: message,
     });
   }
 };
@@ -75,9 +82,16 @@ export const getOrderDetails = (id) => async (dispatch, getState) => {
       payload: data,
     });
   } catch (error) {
+    const message =
+      error.response && error.response.data.message
+        ? error.response.data.message
+        : error.message;
+    if (message === "Not authorized, token failed") {
+      dispatch({ type: USER_LOGOUT });
+    }
     dispatch({
       type: ORDER_DETAILS_FAIL,
-      payload: parseError(error),
+      payload: message,
     });
   }
 };
@@ -112,9 +126,16 @@ export const payOrder = (id, paymentResult) => async (dispatch, getState) => {
       payload: data,
     });
   } catch (error) {
+    const message =
+      error.response && error.response.data.message
+        ? error.response.data.message
+        : error.message;
+    if (message === "Not authorized, token failed") {
+      dispatch({ type: USER_LOGOUT });
+    }
     dispatch({
       type: ORDER_PAY_FAIL,
-      payload: parseError(error),
+      payload: message,
     });
   }
 };
@@ -142,9 +163,16 @@ export const deliverOrder = (id) => async (dispatch, getState) => {
       success: true,
     });
   } catch (error) {
+    const message =
+      error.response && error.response.data.message
+        ? error.response.data.message
+        : error.message;
+    if (message === "Not authorized, token failed") {
+      dispatch({ type: USER_LOGOUT });
+    }
     dispatch({
       type: ORDER_PAY_FAIL,
-      payload: parseError(error),
+      payload: message,
     });
   }
 };
@@ -178,9 +206,16 @@ export const listMyOrders = () => async (dispatch, getState) => {
       payload: data,
     });
   } catch (error) {
+    const message =
+      error.response && error.response.data.message
+        ? error.response.data.message
+        : error.message;
+    if (message === "Not authorized, token failed") {
+      dispatch({ type: USER_LOGOUT });
+    }
     dispatch({
       type: ORDER_LIST_MY_FAIL,
-      payload: parseError(error),
+      payload: message,
     });
   }
 };
@@ -209,9 +244,16 @@ export const listOrders = () => async (dispatch, getState) => {
       payload: data,
     });
   } catch (error) {
+    const message =
+      error.response && error.response.data.message
+        ? error.response.data.message
+        : error.message;
+    if (message === "Not authorized, token failed") {
+      dispatch({ type: USER_LOGOUT });
+    }
     dispatch({
       type: ORDER_LIST_FAIL,
-      payload: parseError(error),
+      payload: message,
     });
   }
 };

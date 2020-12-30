@@ -53,12 +53,16 @@ export const login = (email, password) => async (dispatch) => {
 
     localStorage.setItem("userInfo", JSON.stringify(data));
   } catch (error) {
+    const message =
+      error.response && error.response.data.message
+        ? error.response.data.message
+        : error.message;
+    if (message === "Not authorized, token failed") {
+      dispatch({ type: USER_LOGOUT });
+    }
     dispatch({
       type: USER_LOGIN_FAIL,
-      payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
+      payload: message,
     });
   }
 };
@@ -113,12 +117,16 @@ export const register = (name, email, password) => async (dispatch) => {
     });
     localStorage.setItem("userInfo", JSON.stringify(data));
   } catch (error) {
+    const message =
+      error.response && error.response.data.message
+        ? error.response.data.message
+        : error.message;
+    if (message === "Not authorized, token failed") {
+      dispatch({ type: USER_LOGOUT });
+    }
     dispatch({
       type: USER_REGISTER_FAIL,
-      payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
+      payload: message,
     });
   }
 };
@@ -139,6 +147,7 @@ export const getUserDetails = (id) => async (dispatch, getState) => {
         Authorization: `Bearer ${userInfo.token}`,
       },
     };
+
     const { data } = await axios.get(`/api/users/${id}`, config);
 
     dispatch({
@@ -146,12 +155,16 @@ export const getUserDetails = (id) => async (dispatch, getState) => {
       payload: data,
     });
   } catch (error) {
+    const message =
+      error.response && error.response.data.message
+        ? error.response.data.message
+        : error.message;
+    if (message === "Not authorized, token failed") {
+      dispatch({ type: USER_LOGOUT });
+    }
     dispatch({
       type: USER_DETAILS_FAIL,
-      payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
+      payload: message,
     });
   }
 };
@@ -182,12 +195,17 @@ export const updateUserProfile = (user) => async (dispatch, getState) => {
     });
     localStorage.setItem("userInfo", JSON.stringify(data));
   } catch (error) {
+    const message =
+      error.response && error.response.data.message
+        ? error.response.data.message
+        : error.message;
+    if (message === "Not authorized, token failed") {
+      dispatch({ type: USER_LOGOUT });
+    }
+
     dispatch({
       type: USER_UPDATE_PROFILE_FAIL,
-      payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
+      payload: message,
     });
   }
 };
@@ -216,12 +234,16 @@ export const listUsers = () => async (dispatch, getState) => {
       payload: data,
     });
   } catch (error) {
+    const message =
+      error.response && error.response.data.message
+        ? error.response.data.message
+        : error.message;
+    if (message === "Not authorized, token failed") {
+      dispatch({ type: USER_LOGOUT });
+    }
     dispatch({
       type: USER_LIST_FAIL,
-      payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
+      payload: message,
     });
   }
 };
@@ -249,12 +271,16 @@ export const deleteUser = (id) => async (dispatch, getState) => {
       type: USER_DELETE_SUCCESS,
     });
   } catch (error) {
+    const message =
+      error.response && error.response.data.message
+        ? error.response.data.message
+        : error.message;
+    if (message === "Not authorized, token failed") {
+      dispatch({ type: USER_LOGOUT });
+    }
     dispatch({
       type: USER_DELETE_FAIL,
-      payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
+      payload: message,
     });
   }
 };
@@ -286,12 +312,16 @@ export const updateUser = (user) => async (dispatch, getState) => {
       payload: data,
     });
   } catch (error) {
+    const message =
+      error.response && error.response.data.message
+        ? error.response.data.message
+        : error.message;
+    if (message === "Not authorized, token failed") {
+      dispatch({ type: USER_LOGOUT });
+    }
     dispatch({
       type: USER_UPDATE_FAIL,
-      payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
+      payload: message,
     });
   }
 };
