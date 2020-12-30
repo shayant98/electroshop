@@ -23,6 +23,7 @@ import {
   PRODUCT_TOP_SUCCESS,
   PRODUCT_TOP_FAIL,
 } from "../constants/productConstants";
+import { parseError } from "../utils/ParseError";
 
 export const listProducts = (keyword = "", pageNumber = "") => async (
   dispatch
@@ -36,10 +37,7 @@ export const listProducts = (keyword = "", pageNumber = "") => async (
   } catch (error) {
     dispatch({
       type: PRODUCT_LIST_FAIL,
-      payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
+      payload: parseError(error),
     });
   }
 };
@@ -52,10 +50,7 @@ export const listProductDetails = (id) => async (dispatch) => {
   } catch (error) {
     dispatch({
       type: PRODUCT_DETAILS_FAIL,
-      payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
+      payload: parseError(error),
     });
   }
 };
@@ -84,10 +79,7 @@ export const deleteProduct = (id) => async (dispatch, getState) => {
   } catch (error) {
     dispatch({
       type: PRODUCT_DELETE_FAIL,
-      payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
+      payload: parseError(error),
     });
   }
 };
@@ -118,10 +110,7 @@ export const createProduct = () => async (dispatch, getState) => {
   } catch (error) {
     dispatch({
       type: PRODUCT_CREATE_FAIL,
-      payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
+      payload: parseError(error),
     });
   }
 };
@@ -156,10 +145,7 @@ export const updateProduct = (product) => async (dispatch, getState) => {
   } catch (error) {
     dispatch({
       type: PRODUCT_UPDATE_FAIL,
-      payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
+      payload: parseError(error),
     });
   }
 };
@@ -192,10 +178,7 @@ export const createProductReview = (id, review) => async (
   } catch (error) {
     dispatch({
       type: PRODUCT_CREATE_REVIEW_FAIL,
-      payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
+      payload: parseError(error),
     });
   }
 };
@@ -208,10 +191,7 @@ export const listTopProducts = () => async (dispatch) => {
   } catch (error) {
     dispatch({
       type: PRODUCT_TOP_FAIL,
-      payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
+      payload: parseError(error),
     });
   }
 };

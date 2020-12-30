@@ -17,6 +17,7 @@ import {
   ORDER_PAY_SUCCESS,
 } from "../constants/orderConstants";
 import axios from "axios";
+import { parseError } from "../utils/ParseError";
 
 export const createOrder = (order) => async (dispatch, getState) => {
   try {
@@ -45,10 +46,7 @@ export const createOrder = (order) => async (dispatch, getState) => {
   } catch (error) {
     dispatch({
       type: ORDER_CREATE_FAIL,
-      payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
+      payload: parseError(error),
     });
   }
 };
@@ -79,10 +77,7 @@ export const getOrderDetails = (id) => async (dispatch, getState) => {
   } catch (error) {
     dispatch({
       type: ORDER_DETAILS_FAIL,
-      payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
+      payload: parseError(error),
     });
   }
 };
@@ -119,10 +114,7 @@ export const payOrder = (id, paymentResult) => async (dispatch, getState) => {
   } catch (error) {
     dispatch({
       type: ORDER_PAY_FAIL,
-      payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
+      payload: parseError(error),
     });
   }
 };
@@ -152,10 +144,7 @@ export const deliverOrder = (id) => async (dispatch, getState) => {
   } catch (error) {
     dispatch({
       type: ORDER_PAY_FAIL,
-      payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
+      payload: parseError(error),
     });
   }
 };
@@ -191,10 +180,7 @@ export const listMyOrders = () => async (dispatch, getState) => {
   } catch (error) {
     dispatch({
       type: ORDER_LIST_MY_FAIL,
-      payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
+      payload: parseError(error),
     });
   }
 };
@@ -225,10 +211,7 @@ export const listOrders = () => async (dispatch, getState) => {
   } catch (error) {
     dispatch({
       type: ORDER_LIST_FAIL,
-      payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
+      payload: parseError(error),
     });
   }
 };
