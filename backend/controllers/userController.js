@@ -107,7 +107,13 @@ const updateUserProfile = asyncHandler(async (req, res, next) => {
 // @route GET /api/users
 // @access Private/Admin
 const getUsers = asyncHandler(async (req, res, next) => {
-  const users = await User.find({});
+  const search = req.query.search;
+  if (search) {
+    query = { $text: { $search: search } };
+  } else {
+    query = {};
+  }
+  const users = await User.find({ ...query });
 
   res.json(users);
 });

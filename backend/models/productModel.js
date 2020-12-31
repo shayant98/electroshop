@@ -58,6 +58,20 @@ const productchema = mongoose.Schema(
       default: 0,
     },
     reviews: [reviewSchema],
+    onSale: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
+    sales: [
+      {
+        sale: {
+          type: mongoose.Schema.Types.ObjectId,
+          required: true,
+          ref: "Sale",
+        },
+      },
+    ],
     numReviews: {
       type: Number,
       required: true,

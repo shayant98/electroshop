@@ -6,6 +6,7 @@ const connectDB = require("./config/db");
 const productRoutes = require("./routes/productRoutes");
 const userRoutes = require("./routes/userRoutes");
 const orderRoutes = require("./routes/orderRoutes");
+const saleRoutes = require("./routes/saleRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
 const { errorHandler, notFound } = require("./middleware/errorMiddleware");
 
@@ -21,6 +22,7 @@ connectDB();
 app.use("/api/products", productRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/sales", saleRoutes);
 app.use("/api/upload", uploadRoutes);
 
 app.get("/api/config/paypal", (req, res) =>
