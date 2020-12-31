@@ -8,6 +8,7 @@ const {
   getSales,
   getSaleById,
   updateSale,
+  deleteSale,
 } = require("../controllers/saleController");
 
 router
@@ -19,6 +20,7 @@ router.route("/active").get(getActiveSales);
 router
   .route("/:id")
   .get(protect, isAdmin, getSaleById)
-  .put(protect, isAdmin, updateSale);
+  .put(protect, isAdmin, updateSale)
+  .delete(protect, isAdmin, deleteSale);
 
 module.exports = router;

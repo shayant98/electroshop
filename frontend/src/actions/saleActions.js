@@ -1,3 +1,5 @@
+import axios from "axios";
+
 import {
   SALE_DELETE_FAIL,
   SALE_DELETE_REQUEST,
@@ -10,13 +12,25 @@ import {
   SALE_LIST_SUCCESS,
   SALE_UPDATE_FAIL,
   SALE_UPDATE_REQUEST,
+  SALE_UPDATE_SUCCESS,
 } from "../constants/saleConstants";
 import { USER_LOGOUT } from "../constants/userConstants";
 
-export const listProducts = () => async (dispatch) => {
+export const listSales = () => async (dispatch, getState) => {
   try {
+    const {
+      userLogin: { userInfo },
+    } = getState();
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+
     dispatch({ type: SALE_LIST_REQUEST });
-    const { data } = await axios.get(`/api/sales`);
+    const { data } = await axios.get(`/api/sales`, config);
     dispatch({ type: SALE_LIST_SUCCESS, payload: data });
   } catch (error) {
     const message =
@@ -34,7 +48,7 @@ export const listProducts = () => async (dispatch) => {
   }
 };
 
-export const listProductDetails = (id) => async (dispatch) => {
+export const listSaleDetails = (id) => async (dispatch) => {
   try {
     dispatch({ type: SALE_DETAILS_REQUEST });
     const { data } = await axios.get(`/api/sales/${id}`);
@@ -54,7 +68,7 @@ export const listProductDetails = (id) => async (dispatch) => {
     });
   }
 };
-export const deleteProduct = (id) => async (dispatch, getState) => {
+export const deleteSale = (id) => async (dispatch, getState) => {
   try {
     dispatch({
       type: SALE_DELETE_REQUEST,
@@ -91,7 +105,7 @@ export const deleteProduct = (id) => async (dispatch, getState) => {
     });
   }
 };
-export const updateProduct = (product) => async (dispatch, getState) => {
+export const updateSale = (sale) => async (dispatch, getState) => {
   try {
     dispatch({
       type: SALE_UPDATE_REQUEST,
@@ -108,11 +122,7 @@ export const updateProduct = (product) => async (dispatch, getState) => {
       },
     };
 
-    const { data } = await axios.put(
-      `/api/products/${product._id}`,
-      product,
-      config
-    );
+    const { data } = await axios.put(`/api/sales/${sale._id}`, sale, config);
 
     dispatch({
       type: SALE_UPDATE_SUCCESS,

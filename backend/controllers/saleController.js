@@ -40,7 +40,15 @@ const getActiveSales = asyncHandler(async (req, res, next) => {
 // @route GET /api/sales/:id
 // @access Private/Admin
 const getSaleById = asyncHandler(async (req, res, next) => {
-  const { name, startsOn, endsOn, percentge, ammount, isActive } = req.body;
+  const {
+    name,
+    startsOn,
+    endsOn,
+    percentge,
+    ammount,
+    isActive,
+    products,
+  } = req.body;
   const sale = await Sale.findById(req.params.id);
   if (sale) {
     sale.name = name;
@@ -49,6 +57,7 @@ const getSaleById = asyncHandler(async (req, res, next) => {
     sale.isActive = isActive;
     sale.percentge = percentge;
     sale.ammount = ammount;
+    sale.affectedProducts = products.length;
   } else {
     res.status(404);
     throw new Error("Sale not found");
@@ -69,4 +78,26 @@ const updateSale = asyncHandler(async (req, res, next) => {
   }
 });
 
-module.exports = { addSale, getSales, getActiveSales, getSaleById, updateSale };
+// @desc Delete sale
+// @route DELETE /api/sales/:id
+// @access Private/Admin
+const deleteSale = asyncHandler(async (req, res, next) => {
+  const sale = await Sale.findById(req.params.id);
+
+  if (sale) {
+    await sale.remove();
+    res.json({ message: "Sale removed" });
+  } else {
+    res.status(404);
+    throw new Error("Sale not found");
+  }
+});
+
+module.exports = {
+  addSale,
+  getSales,
+  getActiveSales,
+  getSaleById,
+  updateSale,
+  deleteSale,
+};
