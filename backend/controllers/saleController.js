@@ -39,15 +39,16 @@ const getActiveSales = asyncHandler(async (req, res, next) => {
 // @desc get sale by id
 // @route GET /api/sales/:id
 // @access Private/Admin
-const getSaleById = asyncHandler(async (req, res, next) => {
+const updateSale = asyncHandler(async (req, res, next) => {
   const {
     name,
     startsOn,
     endsOn,
-    percentge,
+    percentage,
     ammount,
     isActive,
     products,
+    coupon,
   } = req.body;
   const sale = await Sale.findById(req.params.id);
   if (sale) {
@@ -55,9 +56,13 @@ const getSaleById = asyncHandler(async (req, res, next) => {
     sale.startsOn = startsOn;
     sale.endsOn = endsOn;
     sale.isActive = isActive;
-    sale.percentge = percentge;
-    sale.ammount = ammount;
+    sale.salePercentage = percentage;
+    sale.saleAmmount = ammount;
+    sale.couponCode = coupon;
     sale.affectedProducts = products.length;
+
+    const updatedSale = await sale.save();
+    res.json(updatedSale);
   } else {
     res.status(404);
     throw new Error("Sale not found");
@@ -67,7 +72,7 @@ const getSaleById = asyncHandler(async (req, res, next) => {
 // @desc get sale by id
 // @route GET /api/sales/:id
 // @access Private/Admin
-const updateSale = asyncHandler(async (req, res, next) => {
+const getSaleById = asyncHandler(async (req, res, next) => {
   const sale = await Sale.findById(req.params.id);
 
   if (sale) {

@@ -8,11 +8,14 @@ const {
   updateProduct,
   createProductReview,
   getTopProducts,
+  getCatProducts,
 } = require("../controllers/productController");
 const { protect, isAdmin } = require("../middleware/authMiddleware");
 
 router.route("/").get(getProducts).post(protect, isAdmin, createProduct);
 router.route("/top").get(getTopProducts);
+router.route("/category").get(protect, getCatProducts);
+
 router
   .route("/:id")
   .get(getProductById)

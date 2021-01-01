@@ -49,7 +49,12 @@ const HomeScreen = ({ match }) => {
               ))
             )}
           </Row>
-          <Paginate pages={pages} page={page} keyword={keyword} />
+          <Paginate
+            pages={pages}
+            page={page}
+            currentPage={keyword ? "search" : "home"}
+            keyword={keyword}
+          />
         </>
       )}
     </>

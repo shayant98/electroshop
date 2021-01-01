@@ -1,6 +1,9 @@
 import axios from "axios";
 
 import {
+  SALE_CREATE_FAIL,
+  SALE_CREATE_REQUEST,
+  SALE_CREATE_SUCCESS,
   SALE_DELETE_FAIL,
   SALE_DELETE_REQUEST,
   SALE_DELETE_SUCCESS,
@@ -48,10 +51,21 @@ export const listSales = () => async (dispatch, getState) => {
   }
 };
 
-export const listSaleDetails = (id) => async (dispatch) => {
+export const getSaleDetails = (id) => async (dispatch, getState) => {
   try {
+    const {
+      userLogin: { userInfo },
+    } = getState();
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+
     dispatch({ type: SALE_DETAILS_REQUEST });
-    const { data } = await axios.get(`/api/sales/${id}`);
+    const { data } = await axios.get(`/api/sales/${id}`, config);
     dispatch({ type: SALE_DETAILS_SUCCESS, payload: data });
   } catch (error) {
     const message =
@@ -64,6 +78,45 @@ export const listSaleDetails = (id) => async (dispatch) => {
 
     dispatch({
       type: SALE_DETAILS_FAIL,
+      payload: message,
+    });
+  }
+};
+
+export const createSale = () => async (dispatch, getState) => {
+  try {
+    dispatch({
+      type: SALE_CREATE_REQUEST,
+    });
+
+    const {
+      userLogin: { userInfo },
+    } = getState();
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+
+    const { data } = await axios.post(`/api/sales`, {}, config);
+
+    dispatch({
+      type: SALE_CREATE_SUCCESS,
+      payload: data,
+    });
+  } catch (error) {
+    const message =
+      error.response && error.response.data.message
+        ? error.response.data.message
+        : error.message;
+    if (message === "Not authorized, token failed") {
+      dispatch({ type: USER_LOGOUT });
+    }
+
+    dispatch({
+      type: SALE_CREATE_FAIL,
       payload: message,
     });
   }

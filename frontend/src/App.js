@@ -19,6 +19,7 @@ import ProductListScreen from "./screens/ProductListScreen";
 import ProductEditScreen from "./screens/productEditScreen";
 import OrderListScreen from "./screens/OrderListScreen";
 import SaleListScreen from "./screens/SaleListScreen";
+import SaleEditScreen from "./screens/SaleEditScreen";
 function App() {
   return (
     <Router>
@@ -30,6 +31,7 @@ function App() {
           <Route path="/profile" component={ProfileScreen} />
           <Route path="/admin/userlist" component={UserListScreen} />
           <Route path="/admin/saleslist" component={SaleListScreen} />
+          <Route path="/admin/sale/:id/edit" component={SaleEditScreen} />
           <Route path="/admin/orderlist" component={OrderListScreen} />
           <Route path="/admin/user/:id/edit" component={UserEditScreen} />
           <Route
@@ -52,9 +54,11 @@ function App() {
           <Route path="/cart/:id?" component={CartScreen} />
           <Route path="/" component={HomeScreen} exact />
           <Route path="/page/:pageNumber" component={HomeScreen} />
+
+          {/* Pagination Path */}
           <Route path="/search/:keyword" component={HomeScreen} exact />
           <Route
-            path="/search/page/:keyword/page/pageNumber"
+            path="/search/:keyword/page/:pageNumber"
             component={HomeScreen}
           />
         </Container>

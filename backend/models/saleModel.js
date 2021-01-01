@@ -27,10 +27,16 @@ const saleModel = mongoose.Schema(
       type: Number,
       default: 0,
     },
-    affectedProducts: {
-      type: Number,
-      default: 0,
+    couponCode: {
+      type: String,
+      required: true,
     },
+    affectedProducts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
+    ],
     user: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
@@ -41,6 +47,10 @@ const saleModel = mongoose.Schema(
     timestamps: true,
   }
 );
+
+saleModel.post("update", function (doc) {
+  console.log("Update finished.");
+});
 
 const Sale = mongoose.model("Sale", saleModel);
 
