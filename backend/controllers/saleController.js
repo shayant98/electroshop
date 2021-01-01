@@ -1,5 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const Sale = require("../models/saleModel");
+const mongoose = require("mongoose");
 
 // @desc Create new sale
 // @route POST /api/sales
@@ -9,6 +10,7 @@ const addSale = asyncHandler(async (req, res, next) => {
     name: "Sample Sale",
     startsOn: "01/01/1990",
     endsOn: "01/01/1990",
+    couponCode: "SMPLECDE",
     user: req.user._id,
   });
 
@@ -59,7 +61,19 @@ const updateSale = asyncHandler(async (req, res, next) => {
     sale.salePercentage = percentage;
     sale.saleAmmount = ammount;
     sale.couponCode = coupon;
-    sale.affectedProducts = products.length;
+    if (products) {
+      Object.entries(products).forEach(([key, add]) => {
+        if (add) {
+          if (!sale.affectedProducts.includes(key)) {
+            sale.affectedProducts.push(mongoose.Types.ObjectId(key));
+          }
+        } else {
+          if (sale.affectedProducts.includes(key)) {
+            sale.affectedProducts.pop(mongoose.Types.ObjectId(key));
+          }
+        }
+      });
+    }
 
     const updatedSale = await sale.save();
     res.json(updatedSale);

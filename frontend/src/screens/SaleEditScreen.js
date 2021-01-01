@@ -54,9 +54,18 @@ const SaleEditScreen = ({ history, match }) => {
         setName(sale.name);
         setCoupon(sale.couponCode);
         setAmmount(sale.saleAmmount);
+        setIsActive(sale.isActive);
         setPercentage(sale.salePercentage);
         setStartsOn(sale.startsOn);
         setEndsOn(sale.endsOn);
+        sale.affectedProducts.map((product) => {
+          setProductCheck((prevState) => {
+            return {
+              ...prevState,
+              [product]: true,
+            };
+          });
+        });
       }
     }
   }, [saleId, sale, dispatch, successUpdate, history]);
@@ -74,6 +83,7 @@ const SaleEditScreen = ({ history, match }) => {
       percentage,
       ammount,
     };
+    // console.log(sale);
     dispatch(updateSale(sale));
   };
 

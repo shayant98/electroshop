@@ -40,7 +40,7 @@ const SaleListScreen = ({ history }) => {
     }
 
     if (successCreate) {
-      history.push(`/admin/sales/${createdSale._id}/edit`);
+      history.push(`/admin/sale/${createdSale._id}/edit`);
     } else {
       dispatch(listSales());
     }
@@ -84,9 +84,10 @@ const SaleListScreen = ({ history }) => {
                 <th>NAME</th>
                 <th>START</th>
                 <th>END</th>
-                <th>Active</th>
-                <th>Sales Percentage</th>
-                <th>Sales Ammount</th>
+                <th>ACTIVE</th>
+                <th>SALE</th>
+                <th>COUPON</th>
+                <th>AFFECTED PRODUCTS</th>
                 <th></th>
               </tr>
             </thead>
@@ -104,8 +105,15 @@ const SaleListScreen = ({ history }) => {
                       <i className="fas fa-times" style={{ color: "red" }} />
                     )}
                   </td>
-                  <td>{sale.salePercentage}</td>
-                  <td>{sale.saleAmmount}</td>
+                  <td>
+                    {sale.salePercentage !== 0
+                      ? `${sale.salePercentage}%`
+                      : sale.saleAmmount !== 0
+                      ? `$${sale.saleAmmount}`
+                      : 0}
+                  </td>
+                  <td>{sale.couponCode}</td>
+                  <td>{sale.affectedProducts.length}</td>
                   <td>
                     <LinkContainer to={`/admin/sale/${sale._id}/edit`}>
                       <Button variant="light" className="btn-sm">
