@@ -1,6 +1,9 @@
 import axios from "axios";
 
 import {
+  SALE_COUPON_FAIL,
+  SALE_COUPON_REQUEST,
+  SALE_COUPON_SUCCESS,
   SALE_CREATE_FAIL,
   SALE_CREATE_REQUEST,
   SALE_CREATE_SUCCESS,
@@ -193,6 +196,45 @@ export const updateSale = (sale) => async (dispatch, getState) => {
 
     dispatch({
       type: SALE_UPDATE_FAIL,
+      payload: message,
+    });
+  }
+};
+
+export const couponCodeCheck = (code) => async (dispatch, getState) => {
+  try {
+    dispatch({
+      type: SALE_COUPON_REQUEST,
+    });
+
+    const {
+      userLogin: { userInfo },
+    } = getState();
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+
+    const { data } = await axios.get(`/api/sales/${code}/coupon`, config);
+
+    dispatch({
+      type: SALE_COUPON_SUCCESS,
+      payload: data,
+    });
+  } catch (error) {
+    const message =
+      error.response && error.response.data.message
+        ? error.response.data.message
+        : error.message;
+    if (message === "Not authorized, token failed") {
+      dispatch({ type: USER_LOGOUT });
+    }
+
+    dispatch({
+      type: SALE_COUPON_FAIL,
       payload: message,
     });
   }

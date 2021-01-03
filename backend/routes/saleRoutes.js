@@ -9,6 +9,7 @@ const {
   getSaleById,
   updateSale,
   deleteSale,
+  getSaleByCoupon,
 } = require("../controllers/saleController");
 
 router
@@ -23,4 +24,5 @@ router
   .put(protect, isAdmin, updateSale)
   .delete(protect, isAdmin, deleteSale);
 
+router.route("/:coupon/coupon").get(protect, isAdmin, getSaleByCoupon);
 module.exports = router;

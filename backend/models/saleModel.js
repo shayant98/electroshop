@@ -30,13 +30,8 @@ const saleModel = mongoose.Schema(
     couponCode: {
       type: String,
       required: true,
+      unique: true,
     },
-    affectedProducts: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-      },
-    ],
     user: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,

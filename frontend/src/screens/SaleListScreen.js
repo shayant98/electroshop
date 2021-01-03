@@ -113,7 +113,6 @@ const SaleListScreen = ({ history }) => {
                       : 0}
                   </td>
                   <td>{sale.couponCode}</td>
-                  <td>{sale.affectedProducts.length}</td>
                   <td>
                     <LinkContainer to={`/admin/sale/${sale._id}/edit`}>
                       <Button variant="light" className="btn-sm">

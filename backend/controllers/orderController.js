@@ -42,7 +42,7 @@ const addOrderItems = asyncHandler(async (req, res, next) => {
 const getOrderById = asyncHandler(async (req, res, next) => {
   const order = await Order.findById(req.params.id).populate(
     "user",
-    "_id name email"
+    "name email"
   );
 
   if (order && (req.user._id == order.user._id || req.user.isAdmin)) {

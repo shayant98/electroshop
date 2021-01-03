@@ -34,6 +34,7 @@ import {
   saleDetailReducer,
   saleListReducer,
   saleUpdateReducer,
+  saleCouponCheckReducer,
 } from "./reducers/saleReducers";
 
 const reducer = combineReducers({
@@ -63,6 +64,7 @@ const reducer = combineReducers({
   saleCreate: saleCreateReducer,
   saleUpdate: saleUpdateReducer,
   saleDelete: saleDeleteReducer,
+  saleCouponCheck: saleCouponCheckReducer,
 });
 
 const cartItemsFromStorage = localStorage.getItem("cartItems")

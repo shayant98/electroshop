@@ -1,14 +1,29 @@
-import React, { useEffect } from "react";
-import { Button, Row, Col, ListGroup, Image, Card } from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import {
+  Button,
+  Row,
+  Col,
+  ListGroup,
+  Image,
+  Card,
+  Form,
+  Badge,
+} from "react-bootstrap";
 import Message from "../components/Message";
 import { useDispatch, useSelector } from "react-redux";
 import CheckoutSteps from "../components/CheckoutSteps";
 import { createOrder } from "../actions/orderActions";
 import { Link } from "react-router-dom";
 import { emptyCart } from "../actions/cartActions";
+import { couponCodeCheck } from "../actions/saleActions";
+import { SALE_COUPON_RESET } from "../constants/saleConstants";
 
 const PlaceOrderScreen = ({ history }) => {
   const dispatch = useDispatch();
+
+  const [coupon, setCoupon] = useState("");
+  const [showCouponField, setShowCouponField] = useState(true);
+  const [discount, setDiscount] = useState(0);
 
   const cart = useSelector((state) => state.cart);
   const { cartItems, shippingAddress, paymentMethod } = cart;
@@ -27,17 +42,50 @@ const PlaceOrderScreen = ({ history }) => {
   const orderCreate = useSelector((state) => state.orderCreate);
   const { success, error, order } = orderCreate;
 
+  const saleCouponCheck = useSelector((state) => state.saleCouponCheck);
+  const { success: successCoupon, error: errorCoupon, sale } = saleCouponCheck;
+
   const shippingPrice = itemsPrice > 100 ? 0 : 750;
   const taxPrice = Number(0.15 * itemsPrice).toFixed(2);
   const totalPrice =
     Number(itemsPrice) + Number(shippingPrice) + Number(taxPrice);
 
   useEffect(() => {
+    dispatch({ type: SALE_COUPON_RESET });
     if (success) {
       dispatch(emptyCart());
       history.push(`/order/${order._id}`);
     }
-  }, [dispatch, success, order, history]);
+    if (successCoupon) {
+      setShowCouponField(false);
+
+      if (sale.salePercentage && sale.salePercentage !== 0) {
+        setDiscount(
+          (totalPrice - totalPrice * (sale.salePercentage / 100)).toFixed(2)
+        );
+      } else {
+        setDiscount(sale.saleAmmount);
+      }
+      computeOrderPrice();
+    }
+  }, [dispatch, success, order, history, successCoupon, sale, totalPrice]);
+
+  const computeOrderPrice = () => {
+    return (
+      Number(itemsPrice) +
+      Number(shippingPrice) +
+      Number(taxPrice) -
+      Number(discount)
+    ).toFixed(2);
+  };
+
+  const couponHandler = (e) => {
+    e.preventDefault();
+
+    if (e.target.value.trim().length > 0) {
+      dispatch(couponCodeCheck(e.target.value.toUpperCase()));
+    }
+  };
 
   const placeorderHandler = () => {
     dispatch(
@@ -50,6 +98,12 @@ const PlaceOrderScreen = ({ history }) => {
         totalPrice,
       })
     );
+  };
+
+  const removeCouponHander = () => {
+    dispatch({ type: SALE_COUPON_RESET });
+    setDiscount(0);
+    setShowCouponField(true);
   };
 
   return (
@@ -131,12 +185,43 @@ const PlaceOrderScreen = ({ history }) => {
               </ListGroup.Item>
               <ListGroup.Item>
                 <Row>
+                  <Col>Discount:</Col>
+                  <Col>${discount}</Col>
+                </Row>
+              </ListGroup.Item>
+              <ListGroup.Item>
+                <Row>
                   <Col>Total:</Col>
-                  <Col>${totalPrice}</Col>
+                  <Col>${computeOrderPrice()}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
                 {error && <Message variant="danger">{error}</Message>}
+                {errorCoupon && (
+                  <Message variant="danger">{errorCoupon}</Message>
+                )}
+                {!showCouponField && (
+                  <Badge pill variant="primary">
+                    {coupon.toUpperCase()}{" "}
+                    <Button onClick={removeCouponHander}>
+                      <i className="fas fa-times" />
+                    </Button>
+                  </Badge>
+                )}
+              </ListGroup.Item>
+              <ListGroup.Item>
+                <Form>
+                  {showCouponField && (
+                    <Form.Group onSubmit={(e) => couponHandler(e)}>
+                      <Form.Control
+                        placeholder="Enter Coupon"
+                        value={coupon}
+                        onChange={(e) => setCoupon(e.target.value)}
+                        onBlur={(e) => couponHandler(e)}
+                      ></Form.Control>
+                    </Form.Group>
+                  )}
+                </Form>
               </ListGroup.Item>
               <ListGroup.Item>
                 <Button

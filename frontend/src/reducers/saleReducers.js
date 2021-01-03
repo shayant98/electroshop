@@ -17,6 +17,10 @@ import {
   SALE_CREATE_SUCCESS,
   SALE_CREATE_FAIL,
   SALE_CREATE_RESET,
+  SALE_COUPON_FAIL,
+  SALE_COUPON_REQUEST,
+  SALE_COUPON_RESET,
+  SALE_COUPON_SUCCESS,
 } from "../constants/saleConstants";
 
 export const saleListReducer = (state = { sales: [] }, action) => {
@@ -86,6 +90,20 @@ export const saleUpdateReducer = (state = {}, action) => {
     case SALE_UPDATE_FAIL:
       return { loading: false, error: action.payload };
     case SALE_UPDATE_RESET:
+      return {};
+    default:
+      return state;
+  }
+};
+export const saleCouponCheckReducer = (state = {}, action) => {
+  switch (action.type) {
+    case SALE_COUPON_REQUEST:
+      return { loading: true };
+    case SALE_COUPON_SUCCESS:
+      return { loading: false, success: true, sale: action.payload };
+    case SALE_COUPON_FAIL:
+      return { loading: false, error: action.payload };
+    case SALE_COUPON_RESET:
       return {};
     default:
       return state;

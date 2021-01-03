@@ -67,8 +67,8 @@ const OrderScreen = ({ match }) => {
       0
     );
   }
+
   const successPaymentHandler = (paymentResult) => {
-    console.log(paymentResult);
     dispatch(payOrder(orderId, paymentResult));
   };
 
@@ -194,16 +194,18 @@ const OrderScreen = ({ match }) => {
               {!sdkReady ? (
                 <Loader />
               ) : (
-                <PayPalButton
-                  style={{
-                    color: "white",
-                    size: "medium",
-                    shape: "rect",
-                    label: "checkout",
-                  }}
-                  amount={order.totalPrice}
-                  onSuccess={successPaymentHandler}
-                />
+                <>
+                  <PayPalButton
+                    style={{
+                      color: "white",
+                      size: "medium",
+                      shape: "rect",
+                      label: "checkout",
+                    }}
+                    amount={order.totalPrice}
+                    onSuccess={successPaymentHandler}
+                  />
+                </>
               )}
             </Col>
           )}

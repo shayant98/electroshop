@@ -38,8 +38,8 @@ const getActiveSales = asyncHandler(async (req, res, next) => {
   res.json(sales);
 });
 
-// @desc get sale by id
-// @route GET /api/sales/:id
+// @desc update Sale
+// @route PUT /api/sales/:id
 // @access Private/Admin
 const updateSale = asyncHandler(async (req, res, next) => {
   const {
@@ -49,7 +49,6 @@ const updateSale = asyncHandler(async (req, res, next) => {
     percentage,
     ammount,
     isActive,
-    products,
     coupon,
   } = req.body;
   const sale = await Sale.findById(req.params.id);
@@ -58,22 +57,9 @@ const updateSale = asyncHandler(async (req, res, next) => {
     sale.startsOn = startsOn;
     sale.endsOn = endsOn;
     sale.isActive = isActive;
-    sale.salePercentage = percentage;
-    sale.saleAmmount = ammount;
+    sale.salePercentage = percentage ?? 0;
+    sale.saleAmmount = ammount ?? 0;
     sale.couponCode = coupon;
-    if (products) {
-      Object.entries(products).forEach(([key, add]) => {
-        if (add) {
-          if (!sale.affectedProducts.includes(key)) {
-            sale.affectedProducts.push(mongoose.Types.ObjectId(key));
-          }
-        } else {
-          if (sale.affectedProducts.includes(key)) {
-            sale.affectedProducts.pop(mongoose.Types.ObjectId(key));
-          }
-        }
-      });
-    }
 
     const updatedSale = await sale.save();
     res.json(updatedSale);
@@ -112,6 +98,27 @@ const deleteSale = asyncHandler(async (req, res, next) => {
   }
 });
 
+// @desc get sale by coupon
+// @route GET /api/sales/:coupon/coupon
+// @access Private/Admin
+const getSaleByCoupon = asyncHandler(async (req, res, next) => {
+  const currentDate = Date.now();
+
+  const sale = await Sale.findOne({
+    couponCode: req.params.coupon,
+    isActive: true,
+    endsOn: { $gte: currentDate },
+    startsOn: { $lte: currentDate },
+  });
+
+  if (sale) {
+    res.json(sale);
+  } else {
+    res.status(404);
+    throw new Error("Sale not found");
+  }
+});
+
 module.exports = {
   addSale,
   getSales,
@@ -119,4 +126,5 @@ module.exports = {
   getSaleById,
   updateSale,
   deleteSale,
+  getSaleByCoupon,
 };
