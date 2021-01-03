@@ -57,8 +57,8 @@ const updateSale = asyncHandler(async (req, res, next) => {
     sale.startsOn = startsOn;
     sale.endsOn = endsOn;
     sale.isActive = isActive;
-    sale.salePercentage = percentage ?? 0;
-    sale.saleAmmount = ammount ?? 0;
+    sale.salePercentage = percentage || 0;
+    sale.saleAmmount = ammount || 0;
     sale.couponCode = coupon;
 
     const updatedSale = await sale.save();
