@@ -16,6 +16,7 @@ import { createOrder } from "../actions/orderActions";
 import { Link } from "react-router-dom";
 import { emptyCart } from "../actions/cartActions";
 import { couponCodeCheck } from "../actions/saleActions";
+import { getUserDetails } from "../actions/userActions";
 import { SALE_COUPON_RESET } from "../constants/saleConstants";
 
 const PlaceOrderScreen = ({ history }) => {
@@ -45,6 +46,9 @@ const PlaceOrderScreen = ({ history }) => {
   const saleCouponCheck = useSelector((state) => state.saleCouponCheck);
   const { success: successCoupon, error: errorCoupon, sale } = saleCouponCheck;
 
+  const userDetails = useSelector((state) => state.userDetails);
+  const { user } = userDetails;
+
   const shippingPrice = itemsPrice > 100 ? 0 : 750;
   const taxPrice = Number(0.15 * itemsPrice).toFixed(2);
   const totalPrice =
@@ -68,7 +72,20 @@ const PlaceOrderScreen = ({ history }) => {
       }
       computeOrderPrice();
     }
-  }, [dispatch, success, order, history, successCoupon, sale, totalPrice]);
+
+    if (!user.name) {
+      dispatch(getUserDetails("profile"));
+    }
+  }, [
+    dispatch,
+    success,
+    order,
+    history,
+    successCoupon,
+    sale,
+    totalPrice,
+    user,
+  ]);
 
   const computeOrderPrice = () => {
     return (
@@ -108,6 +125,11 @@ const PlaceOrderScreen = ({ history }) => {
 
   return (
     <>
+      {user.name && !user.isVerified && (
+        <Message variant="danger">
+          Please Verify your account to place purchase
+        </Message>
+      )}
       <CheckoutSteps step1 step2 step3 step4 />
       <Row>
         <Col md={8}>
@@ -227,7 +249,7 @@ const PlaceOrderScreen = ({ history }) => {
                 <Button
                   type="button"
                   className="btn-block"
-                  disabled={cartItems === 0}
+                  disabled={cartItems === 0 || !user.isVerified}
                   onClick={placeorderHandler}
                 >
                   Place Order
