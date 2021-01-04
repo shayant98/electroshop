@@ -22,6 +22,7 @@ const OrderScreen = ({ match }) => {
   const dispatch = useDispatch();
 
   const orderId = match.params.id;
+  console.log(orderId);
 
   const orderDetails = useSelector((state) => state.orderDetails);
   const { order, loading, error } = orderDetails;

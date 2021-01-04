@@ -9,6 +9,7 @@ const {
   deleteUser,
   getUserById,
   updateUserById,
+  verifyUser,
 } = require("../controllers/userController");
 const { protect, isAdmin } = require("../middleware/authMiddleware");
 
@@ -23,5 +24,7 @@ router
   .get(protect, isAdmin, getUserById)
   .put(protect, isAdmin, updateUserById)
   .delete(protect, isAdmin, deleteUser);
+
+router.get("/verify/:token", verifyUser);
 
 module.exports = router;

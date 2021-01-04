@@ -53,107 +53,113 @@ const ProfileScreen = ({ history }) => {
   };
 
   return (
-    <Row>
-      <Col md={3}>
-        <h2>User profile</h2>
-        {message && <Message variant="danger">{message}</Message>}
-        {error && <Message variant="danger">{error}</Message>}
-        {success && (
-          <Message variant="success">profile updated successfully</Message>
-        )}
-        {loading && <Loader />}
-        <Form onSubmit={submitHandler}>
-          <Form.Group controlId="name">
-            <Form.Label>Name</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Enter name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            ></Form.Control>
-          </Form.Group>
-          <Form.Group controlId="email">
-            <Form.Label>Email address</Form.Label>
-            <Form.Control
-              type="email"
-              placeholder="Enter email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            ></Form.Control>
-          </Form.Group>
-          <Form.Group controlId="passwors">
-            <Form.Label>Password</Form.Label>
-            <Form.Control
-              type="password"
-              placeholder="Enter password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            ></Form.Control>
-          </Form.Group>
-          <Form.Group controlId="confirmPassword">
-            <Form.Label>repeat password</Form.Label>
-            <Form.Control
-              type="password"
-              placeholder="Cofirm password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            ></Form.Control>
-          </Form.Group>
-          <Button type="submit" variant="primary">
-            Update
-          </Button>
-        </Form>
-      </Col>
-      <Col md={9}>
-        <h2>My Orders</h2>
-        {loadingOrders ? (
-          <Loader />
-        ) : errorOrders ? (
-          <Message variant="danger">{errorOrders}</Message>
-        ) : (
-          <Table striped bordered responsive className="table-sm">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>DATE</th>
-                <th>TOTAL</th>
-                <th>PAID</th>
-                <th>DELIVERED</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((order) => (
-                <tr key={order._id}>
-                  <td>{order._id}</td>
-                  <td>{order.createdAt.substring(0, 10)}</td>
-                  <td>{order.totalPrice}</td>
-                  <td>
-                    {order.isPaid ? (
-                      order.paidAt.substring(0, 10)
-                    ) : (
-                      <i className="fas fa-times" style={{ color: "red" }} />
-                    )}
-                  </td>
-                  <td>
-                    {order.isDelivered ? (
-                      order.deliveredAt.substring(0, 10)
-                    ) : (
-                      <i className="fas fa-times" style={{ color: "red" }} />
-                    )}
-                  </td>
-                  <td>
-                    <LinkContainer to={`/order/${order._id}`}>
-                      <Button variant="light">Details</Button>
-                    </LinkContainer>
-                  </td>
+    <>
+      {user && !user.isVerified && (
+        <Message variant="danger">Please Verify your account</Message>
+      )}
+      <Row>
+        <Col md={3}>
+          <h2>User profile</h2>
+          {message && <Message variant="danger">{message}</Message>}
+
+          {error && <Message variant="danger">{error}</Message>}
+          {success && (
+            <Message variant="success">profile updated successfully</Message>
+          )}
+          {loading && <Loader />}
+          <Form onSubmit={submitHandler}>
+            <Form.Group controlId="name">
+              <Form.Label>Name</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              ></Form.Control>
+            </Form.Group>
+            <Form.Group controlId="email">
+              <Form.Label>Email address</Form.Label>
+              <Form.Control
+                type="email"
+                placeholder="Enter email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              ></Form.Control>
+            </Form.Group>
+            <Form.Group controlId="passwors">
+              <Form.Label>Password</Form.Label>
+              <Form.Control
+                type="password"
+                placeholder="Enter password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              ></Form.Control>
+            </Form.Group>
+            <Form.Group controlId="confirmPassword">
+              <Form.Label>repeat password</Form.Label>
+              <Form.Control
+                type="password"
+                placeholder="Cofirm password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              ></Form.Control>
+            </Form.Group>
+            <Button type="submit" variant="primary">
+              Update
+            </Button>
+          </Form>
+        </Col>
+        <Col md={9}>
+          <h2>My Orders</h2>
+          {loadingOrders ? (
+            <Loader />
+          ) : errorOrders ? (
+            <Message variant="danger">{errorOrders}</Message>
+          ) : (
+            <Table striped bordered responsive className="table-sm">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>DATE</th>
+                  <th>TOTAL</th>
+                  <th>PAID</th>
+                  <th>DELIVERED</th>
+                  <th></th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
-        )}
-      </Col>
-    </Row>
+              </thead>
+              <tbody>
+                {orders.map((order) => (
+                  <tr key={order._id}>
+                    <td>{order._id}</td>
+                    <td>{order.createdAt.substring(0, 10)}</td>
+                    <td>{order.totalPrice}</td>
+                    <td>
+                      {order.isPaid ? (
+                        order.paidAt.substring(0, 10)
+                      ) : (
+                        <i className="fas fa-times" style={{ color: "red" }} />
+                      )}
+                    </td>
+                    <td>
+                      {order.isDelivered ? (
+                        order.deliveredAt.substring(0, 10)
+                      ) : (
+                        <i className="fas fa-times" style={{ color: "red" }} />
+                      )}
+                    </td>
+                    <td>
+                      <LinkContainer to={`/order/${order._id}`}>
+                        <Button variant="light">Details</Button>
+                      </LinkContainer>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          )}
+        </Col>
+      </Row>
+    </>
   );
 };
 

@@ -9,6 +9,7 @@
   "scripts": {
     "start": "node backend/server",
     "server": "nodemon backend/server",
+    "kill": "kill -9 $(lsof -i :5032) &>/dev/null | exit 0",
     "client": "npm start --prefix frontend",
     "dev": "concurrently \"npm run server \" \"npm run client\"",
     "data:import": "node backend/seeder",
@@ -19,14 +20,15 @@
   "author": "Shayant Sital",
   "license": "ISC",
   "dependencies": {
+    "@sendgrid/mail": "^7.4.0",
     "bcryptjs": "^2.4.3",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-async-handler": "^1.1.4",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.10.14",
-    "multer": "^1.4.2",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "multer": "^1.4.2"
   },
   "devDependencies": {
     "concurrently": "^5.3.0",

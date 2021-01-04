@@ -1,6 +1,6 @@
 const asyncHandler = require("express-async-handler");
-const Product = require("../models/productModel");
 const Order = require("../models/orderModel");
+const { sendEmail } = require("../utils/mail");
 
 // @desc Create new order
 // @route POST /api/orders
@@ -44,12 +44,13 @@ const getOrderById = asyncHandler(async (req, res, next) => {
     "user",
     "name email"
   );
-
-  if (order && (req.user._id == order.user._id || req.user.isAdmin)) {
+  console.log(req.user._id, order.user._id);
+  if (order && (req.user._id.equals(order.user._id) || req.user.isAdmin)) {
     res.json(order);
   } else {
+    console.log();
     res.status(404);
-    throw new Error("Order not found");
+    throw new Error(`${req.user._id}-${order.user._id}`);
   }
 });
 
@@ -57,7 +58,7 @@ const getOrderById = asyncHandler(async (req, res, next) => {
 // @route PUT /api/orders/:id/pay
 // @access Private
 const updateOrderToPaid = asyncHandler(async (req, res, next) => {
-  const order = await Order.findById(req.params.id);
+  const order = await Order.findById(req.params.id).populate("user", "email");
 
   if (order) {
     order.isPaid = true;
@@ -68,6 +69,21 @@ const updateOrderToPaid = asyncHandler(async (req, res, next) => {
       update_time: req.body.update_time,
       email_address: req.body.payer.email_address,
     };
+
+    const data = {
+      templateName: "order",
+      receiver: order.user.email,
+      order: order._id,
+      tax: order.taxPrice,
+      itemsPrice: order.orderItems.reduce(
+        (acc, item) => acc + item.price * item.qty,
+        0
+      ),
+      shipping: order.shippingPrice,
+      total: order.totalPrice,
+      orderItems: order.orderItems,
+    };
+    await sendEmail(data);
 
     const updatedOrder = await order.save();
     res.json(updatedOrder);

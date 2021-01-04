@@ -1,6 +1,9 @@
 const asyncHandler = require("express-async-handler");
+const jwt = require("jsonwebtoken");
+
 const User = require("../models/userModel");
-const generateToken = require("../utils/generateToken");
+const { generateToken, generateEmailToken } = require("../utils/generateToken");
+const { sendEmail } = require("../utils/mail");
 
 // @desc Authenticate user with email & return tokem
 // @route POST /api/users/login
@@ -43,6 +46,16 @@ const registerUser = asyncHandler(async (req, res, next) => {
   });
 
   if (user) {
+    const data = {
+      templateName: "confirm_account",
+      receiver: user.email,
+      name: user.name,
+      confirm_account_url: `${
+        req.hostname
+      }/api/users/verify/${generateEmailToken(user._id)}`,
+    };
+    await sendEmail(data);
+
     res.status(201).json({
       _id: user._id,
       name: user.name,
@@ -60,15 +73,10 @@ const registerUser = asyncHandler(async (req, res, next) => {
 // @route GET /api/users/profile
 // @access Private
 const getUserProfile = asyncHandler(async (req, res, next) => {
-  const user = await User.findById(req.user._id);
+  const user = await User.findById(req.user._id).select("-password");
 
   if (user) {
-    res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      isAdmin: user.isAdmin,
-    });
+    res.json(user);
   } else {
     res.status(404);
     throw new Error("User not found");
@@ -169,6 +177,35 @@ const updateUserById = asyncHandler(async (req, res, next) => {
     throw new Error("User not found");
   }
 });
+
+// @desc Verify user account
+// @route PUT /api/users/verify/:token
+// @access Private/Admin
+const verifyUser = asyncHandler(async (req, res, next) => {
+  const { token } = req.params;
+
+  if (!token) {
+    res.status(400);
+    throw Error("Invalid Link");
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_EMAIL_SECRET);
+    if (decoded === undefined) {
+      throw Error("Invalid Token");
+    }
+
+    const user = await User.findById(decoded.id).select("-password");
+
+    user.isVerified = true;
+
+    const updatedUser = await user.save();
+    res.send(updatedUser);
+  } catch (error) {
+    throw Error("User not found");
+  }
+});
+
 module.exports = {
   authUser,
   getUserProfile,
@@ -178,4 +215,5 @@ module.exports = {
   deleteUser,
   getUserById,
   updateUserById,
+  verifyUser,
 };
