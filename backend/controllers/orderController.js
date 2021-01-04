@@ -20,6 +20,10 @@ const addOrderItems = asyncHandler(async (req, res, next) => {
     res.status(400);
     throw new Error("No order Items");
   } else {
+    if (!req.user.isVerified) {
+      throw new Error("Cannot place order, Please verify account first");
+    }
+
     const order = new Order({
       orderItems,
       shippingAddress,
