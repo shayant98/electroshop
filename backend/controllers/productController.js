@@ -1,4 +1,5 @@
 const asyncHandler = require("express-async-handler");
+const { isValidObjectId } = require("mongoose");
 const Product = require("../models/productModel");
 
 // @desc Fetch all products
@@ -27,13 +28,22 @@ const getProducts = asyncHandler(async (req, res, next) => {
 // @route GET /api/products/:id
 // @access Public
 const getProductById = asyncHandler(async (req, res, next) => {
-  const product = await Product.findById(req.params.id);
+  try {
+    if (!isValidObjectId(req.params.id)) {
+      res.status(400);
+      throw new Error("Invalid Id");
+    }
 
-  if (product) {
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+      res.status(404);
+      throw new Error("Product not found");
+    }
+
     res.json(product);
-  } else {
-    res.status(404);
-    throw new Error("Product not found");
+  } catch (error) {
+    throw new Error(error);
   }
 });
 
@@ -151,7 +161,12 @@ const createProductReview = asyncHandler(async (req, res, next) => {
 // @access Public
 const getTopProducts = asyncHandler(async (req, res, next) => {
   const products = await Product.find({}).sort({ rating: -1 }).limit(3);
-  res.json(products);
+  if (products.length !== 0) {
+    res.json(products);
+  } else {
+    res.status(404);
+    throw new Error("Products not found");
+  }
 });
 
 // @desc Get top rated products
