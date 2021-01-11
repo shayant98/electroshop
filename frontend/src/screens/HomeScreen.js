@@ -13,11 +13,6 @@ const HomeScreen = ({ match }) => {
   const keyword = match.params.keyword;
   const pageNumber = match.params.pageNumber || 1;
 
-  // const dispatch = useDispatch();
-
-  // const productList = useSelector((state) => state.productList);
-  // const { loading, error, products, pages, page } = productList;
-
   const { isLoading, isError, error, data, isFetching } = useQuery(
     ["products", pageNumber, keyword],
     fetchAllProducts,
@@ -26,9 +21,6 @@ const HomeScreen = ({ match }) => {
     }
   );
 
-  // useEffect(() => {
-  //   dispatch(listProducts(keyword, pageNumber));
-  // }, [dispatch, keyword, pageNumber]);
   return (
     <>
       <Meta />

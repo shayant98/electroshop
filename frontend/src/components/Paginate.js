@@ -19,13 +19,17 @@ const Paginate = ({ pages, page, currentPage, keyword = "" }) => {
 
   return (
     pages > 1 && (
-      <Pagination>
+      <Pagination size="sm">
         {[...Array(pages).keys()].map((pageCount) => (
-          <LinkContainer key={pageCount + 1} to={computeTo(pageCount)}>
-            <Pagination.Item active={pageCount + 1 === page}>
-              {pageCount + 1}
-            </Pagination.Item>
-          </LinkContainer>
+          <>
+            {pageCount + 1 <= 10 && (
+              <LinkContainer key={pageCount + 1} to={computeTo(pageCount)}>
+                <Pagination.Item active={pageCount + 1 === page}>
+                  {pageCount + 1}
+                </Pagination.Item>
+              </LinkContainer>
+            )}
+          </>
         ))}
       </Pagination>
     )

@@ -1,75 +1,52 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { LinkContainer } from "react-router-bootstrap";
 import { Table, Button, Row, Col } from "react-bootstrap";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  deleteProduct,
-  listProducts,
-  createProduct,
-} from "../actions/productActions";
-import { PRODUCT_CREATE_RESET } from "../constants/productConstants";
+import { useSelector } from "react-redux";
 
 import Message from "../components/Message";
 import Loader from "../components/Loader";
 import Paginate from "../components/Paginate";
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import {
+  createProduct,
+  deleteProduct,
+  fetchAllProducts,
+} from "../services/productServices";
 
 const ProductListScreen = ({ match, history }) => {
   const pageNumber = match.params.pageNumber || 1;
+  const queryClient = useQueryClient();
 
-  const dispatch = useDispatch();
-
-  const productList = useSelector((state) => state.productList);
-  const { loading, error, products, pages, page } = productList;
+  const { isLoading, isError, error, data, isFetching } = useQuery(
+    ["products", pageNumber],
+    fetchAllProducts,
+    {
+      keepPreviousData: true,
+    }
+  );
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
-  const productCreate = useSelector((state) => state.productCreate);
-  const {
-    loading: loadingCreate,
-    error: errorCreate,
-    success: successCreate,
-    product: createdProduct,
-  } = productCreate;
-
-  const productDelete = useSelector((state) => state.productDelete);
-  const {
-    loading: loadingDelete,
-    error: errorDelete,
-    success: successDelete,
-  } = productDelete;
-
-  useEffect(() => {
-    dispatch({ type: PRODUCT_CREATE_RESET });
-
-    if (!userInfo.isAdmin) {
-      history.push("/");
-    }
-
-    if (successCreate) {
-      history.push(`/admin/product/${createdProduct._id}/edit`);
-    } else {
-      dispatch(listProducts("", pageNumber));
-    }
-  }, [
-    dispatch,
-    history,
-    userInfo,
-    successDelete,
-    successCreate,
-    createdProduct,
-    pageNumber,
-  ]);
+  const deleteProductMut = useMutation(deleteProduct, {
+    onSuccess: (data, variables, context) => {
+      queryClient.fetchQuery(["products", pageNumber], fetchAllProducts);
+    },
+  });
+  const createProductMut = useMutation(createProduct, {
+    onSuccess: (data, variables, context) => {
+      history.push(`/admin/product/${data._id}/edit`);
+    },
+  });
 
   const createProductHandler = () => {
-    dispatch(createProduct());
+    createProductMut.mutate({ token: userInfo.token });
   };
 
   const deleteHandler = (id) => {
-    if (window.confirm("are you sure")) {
-      dispatch(deleteProduct(id));
-    }
+    deleteProductMut.mutate({ id, token: userInfo.token });
   };
+
   return (
     <>
       <Row className="align-items-center">
@@ -82,11 +59,15 @@ const ProductListScreen = ({ match, history }) => {
           </Button>
         </Col>
       </Row>
-      {loadingDelete && <Loader />}
-      {errorDelete && <Message variant="danger">{errorDelete}</Message>}
-      {loadingCreate && <Loader />}
-      {errorCreate && <Message variant="danger">{errorCreate}</Message>}
-      {loading ? (
+      {deleteProductMut.isLoading && <Loader />}
+      {deleteProductMut.isError && (
+        <Message variant="danger">{deleteProductMut.error.message}</Message>
+      )}
+      {createProductMut.isLoading && <Loader />}
+      {createProductMut.isError && (
+        <Message variant="danger">{createProductMut.error.message}</Message>
+      )}
+      {isLoading ? (
         <Loader />
       ) : error ? (
         <Message variant="danger">{error}</Message>
@@ -104,7 +85,7 @@ const ProductListScreen = ({ match, history }) => {
               </tr>
             </thead>
             <tbody>
-              {products.map((product) => (
+              {data.products.map((product) => (
                 <tr key={product._id}>
                   <td>{product._id}</td>
                   <td>{product.name}</td>
@@ -129,7 +110,11 @@ const ProductListScreen = ({ match, history }) => {
               ))}
             </tbody>
           </Table>
-          <Paginate pages={pages} page={page} currentPage="productlist" />
+          <Paginate
+            pages={data.pages}
+            page={data.page}
+            currentPage="productlist"
+          />
         </>
       )}
     </>
