@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { listProductDetails } from "../actions/productActions";
 import { LinkContainer } from "react-router-bootstrap";
+import { useQuery } from "react-query";
 
 import {
   Row,
@@ -18,26 +18,18 @@ import Loader from "../components/Loader";
 import Rating from "../components/Rating";
 import Meta from "../components/Meta";
 import ReviewForm from "../components/ReviewForm";
-import { PRODUCT_CREATE_REVIEW_RESET } from "../constants/productConstants";
+import { fetchProduct } from "../services/productServices";
 
 const ProductScreen = ({ match, history }) => {
   const [qty, setQty] = useState(1);
 
-  const dispatch = useDispatch();
-
-  const productDetails = useSelector((state) => state.productDetails);
-  const { loading, error, product } = productDetails;
-
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
-  const productCreateReview = useSelector((state) => state.productCreateReview);
-  const { success } = productCreateReview;
-
-  useEffect(() => {
-    dispatch({ type: PRODUCT_CREATE_REVIEW_RESET });
-    dispatch(listProductDetails(match.params.id));
-  }, [dispatch, match, success]);
+  const { data: product, isLoading, isError } = useQuery(
+    ["product", match.params.id],
+    fetchProduct
+  );
 
   const addToCartHandler = () => {
     history.push(`/cart/${match.params.id}?qty=${qty}`);
@@ -50,10 +42,10 @@ const ProductScreen = ({ match, history }) => {
           Go Back
         </Button>
       </LinkContainer>
-      {loading ? (
+      {isLoading ? (
         <Loader />
-      ) : error ? (
-        <Message variant="danger" value={error}></Message>
+      ) : isError ? (
+        <Message variant="danger">Could not find product</Message>
       ) : (
         <>
           <Meta title={product.name} />
@@ -150,7 +142,7 @@ const ProductScreen = ({ match, history }) => {
               </ListGroup>
               <ListGroup.Item>
                 {userInfo ? (
-                  <ReviewForm productId={product._id} />
+                  <ReviewForm productId={product._id} token={userInfo.token} />
                 ) : (
                   <p>
                     <Link to="/login">Login</Link> to place a review

@@ -1,25 +1,21 @@
 import React, { useEffect } from "react";
 import { Carousel, Image } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-
 import Loader from "./Loader";
 import Message from "./Message";
-import { listTopProducts } from "../actions/productActions";
+import { useQuery } from "react-query";
+import { fetchTopRatedProducts } from "../services/productServices";
 
 const ProductCarousel = () => {
-  const dispatch = useDispatch();
+  const { isLoading, data: products, isError, error } = useQuery(
+    "top-products",
+    fetchTopRatedProducts
+  );
 
-  const productTopRated = useSelector((state) => state.productTopRated);
-  const { loading, error, products } = productTopRated;
-
-  useEffect(() => {
-    dispatch(listTopProducts());
-  }, [dispatch]);
-  return loading ? (
+  return isLoading ? (
     <Loader />
-  ) : error ? (
-    <Message variant="danger">{error}</Message>
+  ) : isError ? (
+    <Message variant="danger">{error.message}</Message>
   ) : (
     <Carousel pause="hover" className="bg-dark">
       {products.map((product) => (
