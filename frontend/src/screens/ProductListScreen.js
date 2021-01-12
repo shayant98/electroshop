@@ -17,7 +17,7 @@ const ProductListScreen = ({ match, history }) => {
   const pageNumber = match.params.pageNumber || 1;
   const queryClient = useQueryClient();
 
-  const { isLoading, isError, error, data, isFetching } = useQuery(
+  const { isLoading, error, data } = useQuery(
     ["products", pageNumber],
     fetchAllProducts,
     {

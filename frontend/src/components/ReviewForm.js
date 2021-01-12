@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button, Form } from "react-bootstrap";
 
 import Message from "../components/Message";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQueryClient } from "react-query";
 import { createProductReview, fetchProduct } from "../services/productServices";
 
 const ReviewForm = ({ productId, token }) => {

@@ -5,10 +5,14 @@ import { Navbar, Nav, Container, NavDropdown } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
 import { logout } from "../actions/userActions";
 import SearchBox from "./SearchBox";
+import { useQuery } from "react-query";
+import { fetchProfile } from "../services/userService";
 
 const Header = () => {
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
+
+  const { data } = useQuery(["user", userInfo.token], fetchProfile);
 
   const dispatch = useDispatch();
 
@@ -31,8 +35,8 @@ const Header = () => {
                   <i className="fas fa-shopping-cart"></i> Cart
                 </Nav.Link>
               </LinkContainer>
-              {userInfo ? (
-                <NavDropdown title={userInfo.name}>
+              {data ? (
+                <NavDropdown title={data.name}>
                   <LinkContainer to="/profile">
                     <NavDropdown.Item>Profile</NavDropdown.Item>
                   </LinkContainer>

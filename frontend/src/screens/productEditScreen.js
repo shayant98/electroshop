@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Form, Button } from "react-bootstrap";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import Message from "../components/Message";
 import Loader from "../components/Loader";
 import FormContainer from "../components/FormContainer";
@@ -24,8 +24,6 @@ const ProductEditScreen = ({ match, history }) => {
   const [description, setDescription] = useState("");
   const [uploading, setUploading] = useState(false);
   const [validationError, setValidationError] = useState("");
-
-  const dispatch = useDispatch();
 
   const { data: product, isLoading, isError, error } = useQuery(
     ["product", match.params.id],

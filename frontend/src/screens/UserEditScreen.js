@@ -1,51 +1,47 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Form, Button } from "react-bootstrap";
-import { useDispatch, useSelector } from "react-redux";
-import { getUserDetails, updateUser } from "../actions/userActions";
-import { USER_UPDATE_RESET } from "../constants/userConstants";
+import { useSelector } from "react-redux";
 
 import Message from "../components/Message";
 import Loader from "../components/Loader";
 import FormContainer from "../components/FormContainer";
+import { fetchUser, updateUser } from "../services/userService";
+import { useMutation, useQuery } from "react-query";
 
 const UserEditScreen = ({ match, history }) => {
   const userId = match.params.id;
+
+  const userLogin = useSelector((state) => state.userLogin);
+  const { userInfo } = userLogin;
 
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
 
-  const dispatch = useDispatch();
+  const { data: user, isLoading, isError, error } = useQuery(
+    ["user", userId, userInfo.token],
+    fetchUser
+  );
 
-  const userDetails = useSelector((state) => state.userDetails);
-  const { loading, error, user } = userDetails;
-
-  const userUpdate = useSelector((state) => state.userUpdate);
-  const {
-    loading: loadingUpdate,
-    error: errorUpdate,
-    success: successUpdate,
-  } = userUpdate;
+  const userUpdateMut = useMutation(updateUser, {
+    onSuccess: (data, variable, con) => {
+      history.push("/admin/userlist");
+    },
+  });
 
   useEffect(() => {
-    if (successUpdate) {
-      dispatch({ type: USER_UPDATE_RESET });
-      history.push("/admin/userlist");
-    } else {
-      if (!user.name || user._id !== userId) {
-        dispatch(getUserDetails(userId));
-      } else {
-        setName(user.name);
-        setEmail(user.email);
-        setIsAdmin(user.isAdmin);
-      }
+    if (user) {
+      setName(user.name);
+      setEmail(user.email);
+      setIsAdmin(user.isAdmin);
     }
-  }, [userId, user, dispatch, successUpdate, history]);
+  }, [user]);
 
   const submitHandler = (e) => {
     e.preventDefault();
-    dispatch(updateUser({ _id: userId, name, email, isAdmin }));
+    const user = { _id: userId, name, email, isAdmin };
+    userUpdateMut.mutate({ user, token: userInfo.token, id: userId });
   };
 
   return (
@@ -55,13 +51,15 @@ const UserEditScreen = ({ match, history }) => {
       </Link>
       <FormContainer>
         <h1>Edit User</h1>
-        {loadingUpdate && <Loader />}
-        {errorUpdate && <Message variant="danger">{errorUpdate}</Message>}
+        {userUpdateMut.isLoading && <Loader />}
+        {userUpdateMut.isError && (
+          <Message variant="danger">{userUpdateMut.error.message}</Message>
+        )}
 
-        {loading ? (
+        {isLoading ? (
           <Loader />
-        ) : error ? (
-          <Message variant="danger">{error}</Message>
+        ) : isError ? (
+          <Message variant="danger">{error.message}</Message>
         ) : (
           <Form onSubmit={submitHandler}>
             <Form.Group controlId="name">

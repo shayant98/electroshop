@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button, Row, Col, Table } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
-import { useDispatch, useSelector } from "react-redux";
-import { getUserDetails, updateUserProfile } from "../actions/userActions";
-
+import { useSelector } from "react-redux";
 import Message from "../components/Message";
 import Loader from "../components/Loader";
-import { listMyOrders } from "../actions/orderActions";
+import { fetchProfile, updateProfile } from "../services/userService";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 
 const ProfileScreen = ({ history }) => {
   const [email, setEmail] = useState("");
@@ -15,40 +14,42 @@ const ProfileScreen = ({ history }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState(null);
 
-  const dispatch = useDispatch();
-
-  const userDetails = useSelector((state) => state.userDetails);
-  const { loading, error, user } = userDetails;
+  const queryClient = useQueryClient();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
-  const userUpdateProfile = useSelector((state) => state.userUpdateProfile);
-  const { success } = userUpdateProfile;
+  const { data: user, isLoading, isError, error } = useQuery(
+    ["profile", userInfo.token],
+    fetchProfile
+  );
+
+  const userUpdateMut = useMutation(updateProfile, {
+    onSuccess: (data, variable, con) => {
+      queryClient.setQueryData(["profile", variable.token], data);
+      setMessage("User successfully updated");
+    },
+  });
 
   const orderListMy = useSelector((state) => state.orderListMy);
   const { loading: loadingOrders, error: errorOrders, orders } = orderListMy;
 
   useEffect(() => {
-    if (!userInfo) {
-      history.push("/login");
-    } else {
-      if (!user || !user.name) {
-        dispatch(getUserDetails("profile"));
-        dispatch(listMyOrders());
-      } else {
-        setName(user.name);
-        setEmail(user.email);
-      }
+    if (user) {
+      setName(user.name);
+      setEmail(user.email);
     }
-  }, [history, userInfo, dispatch, user]);
+  }, [user]);
 
   const submitHandler = (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       setMessage("Passwords do not match");
     } else {
-      dispatch(updateUserProfile({ id: user._id, name, email, password }));
+      userUpdateMut.mutate({
+        user: { id: user._id, name, email, password },
+        token: userInfo.token,
+      });
     }
   };
 
@@ -62,11 +63,9 @@ const ProfileScreen = ({ history }) => {
           <h2>User profile</h2>
           {message && <Message variant="danger">{message}</Message>}
 
-          {error && <Message variant="danger">{error}</Message>}
-          {success && (
-            <Message variant="success">profile updated successfully</Message>
-          )}
-          {loading && <Loader />}
+          {isError && <Message variant="danger">{error.message}</Message>}
+
+          {isLoading && <Loader />}
           <Form onSubmit={submitHandler}>
             <Form.Group controlId="name">
               <Form.Label>Name</Form.Label>

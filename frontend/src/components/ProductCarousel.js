@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Carousel, Image } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import Loader from "./Loader";
