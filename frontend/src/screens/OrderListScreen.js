@@ -2,35 +2,27 @@ import React, { useEffect } from "react";
 import { LinkContainer } from "react-router-bootstrap";
 import { Table, Button } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { listOrders } from "../actions/orderActions";
-
+import { useQuery } from "react-query";
 import Message from "../components/Message";
 import Loader from "../components/Loader";
+import { fetchAllOrders, fetchOrder } from "../services/orderService";
 
 const OrderListScreen = ({ history }) => {
-  const dispatch = useDispatch();
-
-  const orderList = useSelector((state) => state.orderList);
-  const { loading, error, orders } = orderList;
-
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
-  useEffect(() => {
-    if (userInfo && userInfo.isAdmin) {
-      dispatch(listOrders());
-    } else {
-      history.push("/");
-    }
-  }, [dispatch, history, userInfo]);
+  const { data: orders, isLoading, isError, error } = useQuery(
+    ["orders", userInfo.token],
+    fetchAllOrders
+  );
 
   return (
     <>
-      <h1>Users</h1>
-      {loading ? (
+      <h1>Orders</h1>
+      {isLoading ? (
         <Loader />
-      ) : error ? (
-        <Message variant="danger">{error}</Message>
+      ) : isError ? (
+        <Message variant="danger">{error.message}</Message>
       ) : (
         <Table>
           <thead>
