@@ -130,3 +130,10 @@ export const fetchCoupon = async ({ queryKey }) => {
     throw new Error(message);
   }
 };
+
+export const fetchPayPalToken = async () => {
+  try {
+    const { data } = await axios.get("/api/config/paypal");
+    return data;
+  } catch (error) {}
+};

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Row, Col, ListGroup, Image, Card, Button } from "react-bootstrap";
 import Message from "../components/Message";
 import { useSelector } from "react-redux";
@@ -7,20 +7,17 @@ import Loader from "../components/Loader";
 
 import { Link } from "react-router-dom";
 import { PayPalButton } from "react-paypal-button-v2";
-import axios from "axios";
 
 import {
   fetchOrder,
   markOrderAsDeliverd,
   markOrderAsPaid,
 } from "../services/orderService";
+import { fetchPayPalToken } from "../services/saleService";
 
 const OrderScreen = ({ match }) => {
-  const [sdkReady, setSdkReady] = useState(false);
-
-  const queryClient = useQueryClient();
-
   const orderId = match.params.id;
+  const queryClient = useQueryClient();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
@@ -30,37 +27,34 @@ const OrderScreen = ({ match }) => {
       queryClient.fetchQuery(["order", orderId, userInfo.token], fetchOrder);
     },
   });
+
   const deliverOrderMut = useMutation(markOrderAsDeliverd, {
     onSuccess: (data) => {
       queryClient.fetchQuery(["order", orderId, userInfo.token], fetchOrder);
     },
   });
-
-  const { data: order, isError, error, isLoading } = useQuery(
+  const { data: order, isError, error, isLoading: orderIsLoading } = useQuery(
     ["order", orderId, userInfo.token],
     fetchOrder
   );
-  useEffect(() => {
-    const addPayPalScript = async () => {
-      const { data: clientId } = await axios.get("/api/config/paypal");
-      const script = document.createElement("script");
-      script.type = "text/javascript";
-      script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}`;
-      script.async = true;
-      script.onload = () => {
-        setSdkReady(true);
-      };
-      document.body.appendChild(script);
-    };
+  const { data: clientId, isFetched, isSuccess } = useQuery(
+    "paypal",
+    fetchPayPalToken
+  );
 
-    if (!window.paypal) {
-      addPayPalScript();
-    } else {
-      setSdkReady(true);
-    }
-  }, []);
+  const addPayPalScript = (clientId) => {
+    const script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}`;
+    script.async = true;
+    document.body.appendChild(script);
+  };
 
-  if (!isLoading && order) {
+  if (!window.paypal && isFetched && isSuccess) {
+    addPayPalScript(clientId);
+  }
+
+  if (!orderIsLoading && order) {
     order.itemsPrice = order.orderItems.reduce(
       (acc, item) => acc + item.price * item.qty,
       0
@@ -78,7 +72,7 @@ const OrderScreen = ({ match }) => {
     });
   };
 
-  return isLoading ? (
+  return orderIsLoading ? (
     <Loader />
   ) : isError ? (
     <Message variant="danger">{error.message}</Message>
@@ -193,7 +187,7 @@ const OrderScreen = ({ match }) => {
           {!order.isPaid && userInfo._id === order.user._id && (
             <Col className="mt-3">
               {payOrderMut.isLoading && <Loader />}
-              {!sdkReady ? (
+              {!isSuccess ? (
                 <Loader />
               ) : (
                 <>
