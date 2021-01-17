@@ -1,11 +1,11 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { LinkContainer } from "react-router-bootstrap";
 import { Table, Button } from "react-bootstrap";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useQuery } from "react-query";
 import Message from "../components/Message";
 import Loader from "../components/Loader";
-import { fetchAllOrders, fetchOrder } from "../services/orderService";
+import { fetchAllOrders } from "../services/orderService";
 
 const OrderListScreen = ({ history }) => {
   const userLogin = useSelector((state) => state.userLogin);

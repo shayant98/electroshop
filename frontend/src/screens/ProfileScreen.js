@@ -6,6 +6,7 @@ import Message from "../components/Message";
 import Loader from "../components/Loader";
 import { fetchProfile, updateProfile } from "../services/userService";
 import { useMutation, useQuery, useQueryClient } from "react-query";
+import { fetchMyOrders } from "../services/orderService";
 
 const ProfileScreen = ({ history }) => {
   const [email, setEmail] = useState("");
@@ -23,16 +24,18 @@ const ProfileScreen = ({ history }) => {
     ["profile", userInfo.token],
     fetchProfile
   );
+  const {
+    data: orders,
+    isLoading: orderIsLoading,
+    error: orderError,
+  } = useQuery(["my-orders", userInfo.token], fetchMyOrders);
 
   const userUpdateMut = useMutation(updateProfile, {
     onSuccess: (data, variable, con) => {
-      queryClient.setQueryData(["profile", variable.token], data);
+      queryClient.invalidateQueries(["profile", variable.token]);
       setMessage("User successfully updated");
     },
   });
-
-  const orderListMy = useSelector((state) => state.orderListMy);
-  const { loading: loadingOrders, error: errorOrders, orders } = orderListMy;
 
   useEffect(() => {
     if (user) {
@@ -110,10 +113,10 @@ const ProfileScreen = ({ history }) => {
         </Col>
         <Col md={9}>
           <h2>My Orders</h2>
-          {loadingOrders ? (
+          {orderIsLoading ? (
             <Loader />
-          ) : errorOrders ? (
-            <Message variant="danger">{errorOrders}</Message>
+          ) : orderError ? (
+            <Message variant="danger">{orderError.message}</Message>
           ) : (
             <Table striped bordered responsive className="table-sm">
               <thead>

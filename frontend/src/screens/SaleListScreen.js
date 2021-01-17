@@ -1,58 +1,42 @@
-import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React from "react";
+import { useSelector } from "react-redux";
 
 import { Button, Col, Row, Table } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
 import Loader from "../components/Loader";
 import Message from "../components/Message";
-import { createSale, deleteSale, listSales } from "../actions/saleActions";
-import { SALE_CREATE_RESET } from "../constants/saleConstants";
+import { fetchSales, deleteSale, createSale } from "../services/saleService";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 
 const SaleListScreen = ({ history }) => {
-  const dispatch = useDispatch();
-
-  const saleList = useSelector((state) => state.saleList);
-  const { error, loading, sales } = saleList;
-
-  const saleDelete = useSelector((state) => state.saleDelete);
-  const {
-    error: errorDelete,
-    loading: loadingDelete,
-    success: successDelete,
-  } = saleDelete;
-
-  const saleCreate = useSelector((state) => state.saleCreate);
-  const {
-    error: errorCreate,
-    loading: loadingCreate,
-    success: successCreate,
-    sale: createdSale,
-  } = saleCreate;
+  const queryClient = useQueryClient();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
-  useEffect(() => {
-    dispatch({ type: SALE_CREATE_RESET });
+  const { isLoading, error, data: sales, isError } = useQuery(
+    ["sales", userInfo.token],
+    fetchSales
+  );
 
-    if (!userInfo.isAdmin) {
-      history.push("/");
-    }
-
-    if (successCreate) {
-      history.push(`/admin/sale/${createdSale._id}/edit`);
-    } else {
-      dispatch(listSales());
-    }
-  }, [dispatch, userInfo, successDelete, history, successCreate, createdSale]);
+  const deleteSaleMut = useMutation(deleteSale, {
+    onSuccess: (data, variables, context) => {
+      queryClient.refetchQueries(["sales", userInfo.token]);
+    },
+  });
+  const createSaleMut = useMutation(createSale, {
+    onSuccess: (data) => {
+      history.push(`/admin/sale/${data._id}/edit`);
+    },
+  });
 
   const deleteHandler = (id) => {
     if (window.confirm("are you sure")) {
-      dispatch(deleteSale(id));
+      deleteSaleMut.mutate({ id, token: userInfo.token });
     }
   };
   const createSaleHandler = () => {
-    dispatch(createSale());
+    createSaleMut.mutate({ token: userInfo.token });
   };
   return (
     <>
@@ -67,16 +51,17 @@ const SaleListScreen = ({ history }) => {
         </Col>
       </Row>
 
-      {loadingCreate && <Loader />}
-      {errorCreate && <Message variant="danger">{errorCreate}</Message>}
-      {loading ? (
+      {createSaleMut.isLoading && <Loader />}
+      {createSaleMut.isError && (
+        <Message variant="danger">{createSaleMut.error.message}</Message>
+      )}
+      {isLoading ? (
         <Loader />
       ) : error ? (
         <Message variant="danger">{error}</Message>
       ) : (
         <>
-          {loadingDelete && <Loader />}
-          {errorDelete && <Message variant="danger">{errorDelete}</Message>}
+          {isError && <Message variant="danger">{error.message}</Message>}
           <Table>
             <thead>
               <tr>

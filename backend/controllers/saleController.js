@@ -8,9 +8,9 @@ const mongoose = require("mongoose");
 const addSale = asyncHandler(async (req, res, next) => {
   const sale = new Sale({
     name: "Sample Sale",
-    startsOn: "01/01/1990",
-    endsOn: "01/01/1990",
-    couponCode: "SMPLECDE",
+    startsOn: Date.now(),
+    endsOn: Date.now(),
+    couponCode: "TEST123",
     user: req.user._id,
   });
 
@@ -102,13 +102,8 @@ const deleteSale = asyncHandler(async (req, res, next) => {
 // @route GET /api/sales/:coupon/coupon
 // @access Private/Admin
 const getSaleByCoupon = asyncHandler(async (req, res, next) => {
-  const currentDate = Date.now();
-
   const sale = await Sale.findOne({
     couponCode: req.params.coupon,
-    isActive: true,
-    endsOn: { $gte: currentDate },
-    startsOn: { $lte: currentDate },
   });
 
   if (sale) {

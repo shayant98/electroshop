@@ -45,7 +45,7 @@ const ProductEditScreen = ({ match, history }) => {
     onError: () => {
       setUploading(false);
     },
-    onSuccess: (data, variables, context) => {
+    onSuccess: (data) => {
       setUploading(false);
       setImage(data);
       setUploading(false);

@@ -23,7 +23,13 @@ import SaleEditScreen from "./screens/SaleEditScreen";
 import { QueryClient, QueryClientProvider } from "react-query";
 
 function App() {
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: false,
+      },
+    },
+  });
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
