@@ -103,7 +103,14 @@ const PlaceOrderScreen = ({ history }) => {
       totalPrice,
     };
 
-    createOrderMut.mutate({ token: userInfo.token, order });
+    createOrderMut.mutate(
+      { token: userInfo.token, order },
+      {
+        onSuccess: (data) => {
+          history.push(`/order/${data._id}`);
+        },
+      }
+    );
   };
 
   const removeCouponHander = () => {
