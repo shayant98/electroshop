@@ -1,70 +1,13 @@
 import { createStore, combineReducers, applyMiddleware } from "redux";
 import thunk from "redux-thunk";
 import { composeWithDevTools } from "redux-devtools-extension";
-import {
-  productCreateReducer,
-  productCreateReviewReducer,
-  productDeleteReducer,
-  productDetailReducer,
-  productListReducer,
-  productTopRatedReducer,
-  productUpdateReducer,
-} from "./reducers/productReducers";
 import { cartReducer } from "./reducers/cartReducers";
-import {
-  userLoginReducer,
-  userRegisterReducer,
-  userDetailsReducer,
-  userUpdateProfileReducer,
-  userListReducer,
-  userDeleteReducer,
-  userUpdateReducer,
-} from "./reducers/userReducers";
-import {
-  orderCreateReducer,
-  orderDeliverReducer,
-  orderDetailsReducer,
-  orderListMyReducer,
-  orderListReducer,
-  orderPayReducer,
-} from "./reducers/orderReducers";
-import {
-  saleCreateReducer,
-  saleDeleteReducer,
-  saleDetailReducer,
-  saleListReducer,
-  saleUpdateReducer,
-  saleCouponCheckReducer,
-} from "./reducers/saleReducers";
+import { userLoginReducer, userRegisterReducer } from "./reducers/userReducers";
 
 const reducer = combineReducers({
-  productList: productListReducer,
-  productDetails: productDetailReducer,
-  productDelete: productDeleteReducer,
-  productCreate: productCreateReducer,
-  productUpdate: productUpdateReducer,
-  productCreateReview: productCreateReviewReducer,
-  productTopRated: productTopRatedReducer,
   cart: cartReducer,
   userLogin: userLoginReducer,
   userRegister: userRegisterReducer,
-  userDetails: userDetailsReducer,
-  userUpdateProfile: userUpdateProfileReducer,
-  userList: userListReducer,
-  userDelete: userDeleteReducer,
-  userUpdate: userUpdateReducer,
-  orderCreate: orderCreateReducer,
-  orderDetails: orderDetailsReducer,
-  orderPay: orderPayReducer,
-  orderListMy: orderListMyReducer,
-  orderList: orderListReducer,
-  orderDeliver: orderDeliverReducer,
-  saleDetail: saleDetailReducer,
-  saleList: saleListReducer,
-  saleCreate: saleCreateReducer,
-  saleUpdate: saleUpdateReducer,
-  saleDelete: saleDeleteReducer,
-  saleCouponCheck: saleCouponCheckReducer,
 });
 
 const cartItemsFromStorage = localStorage.getItem("cartItems")

@@ -1,42 +1,35 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Button, Form } from "react-bootstrap";
-import { useDispatch, useSelector } from "react-redux";
 
-import { createProductReview } from "../actions/productActions";
-import { PRODUCT_CREATE_REVIEW_RESET } from "../constants/productConstants";
 import Message from "../components/Message";
+import { useMutation, useQueryClient } from "react-query";
+import { createProductReview, fetchProduct } from "../services/productServices";
 
-const ReviewForm = ({ productId }) => {
+const ReviewForm = ({ productId, token }) => {
+  const queryClient = useQueryClient();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
 
-  const dispatch = useDispatch();
-
-  const productCreateReview = useSelector((state) => state.productCreateReview);
-  const { error, success } = productCreateReview;
-
-  useEffect(() => {
-    if (success) {
-      dispatch({ type: PRODUCT_CREATE_REVIEW_RESET });
-      setRating(0);
-      setComment("");
-    }
-  }, [dispatch, success, error]);
+  const createReview = useMutation(createProductReview, {
+    onSuccess: (data, variables, context) => {
+      queryClient.fetchQuery(["product", productId], fetchProduct);
+    },
+  });
 
   const submitHandler = (e) => {
     e.preventDefault();
-    dispatch(
-      createProductReview(productId, {
-        rating,
-        comment,
-      })
-    );
+    createReview.mutate({ productId, review: { rating, comment }, token });
   };
 
   return (
     <>
       <h2>Write a Customer Review</h2>
-      {error && <Message variant="danger">{error}</Message>}
+      {createReview.isLoading && (
+        <Message variant="info">Adding review</Message>
+      )}
+      {createReview.isError && (
+        <Message variant="danger">{createReview.error.message}</Message>
+      )}
       <Form onSubmit={submitHandler}>
         <Form.Group controlId="rating">
           <Form.Label>Rating</Form.Label>

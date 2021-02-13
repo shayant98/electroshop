@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { Button, Col, Form, Row } from "react-bootstrap";
-import { useDispatch, useSelector } from "react-redux";
-import { getSaleDetails, updateSale } from "../actions/saleActions";
-
+import { useSelector } from "react-redux";
 import Message from "../components/Message";
 import Loader from "../components/Loader";
 import { Link } from "react-router-dom";
 import FormContainer from "../components/FormContainer";
-import { SALE_UPDATE_RESET } from "../constants/saleConstants";
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import { fetchSale, updateSale } from "../services/saleService";
 
 const SaleEditScreen = ({ history, match }) => {
   const saleId = match.params.id;
+
+  const userLogin = useSelector((state) => state.userLogin);
+  const { userInfo } = userLogin;
 
   const [name, setName] = useState("");
   const [startsOn, setStartsOn] = useState("");
@@ -20,36 +22,31 @@ const SaleEditScreen = ({ history, match }) => {
   const [ammount, setAmmount] = useState(0);
   const [isActive, setIsActive] = useState(false);
 
-  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
 
-  const saleDetail = useSelector((state) => state.saleDetail);
-  const { loading, error, sale } = saleDetail;
-
-  const saleUpdate = useSelector((state) => state.saleUpdate);
-  const {
-    loading: loadingUpdate,
-    error: errorUpdate,
-    success: successUpdate,
-  } = saleUpdate;
+  const { isLoading, error, data: sale, isError } = useQuery(
+    ["sale", saleId, userInfo.token],
+    fetchSale
+  );
 
   useEffect(() => {
-    if (successUpdate) {
-      dispatch({ type: SALE_UPDATE_RESET });
-      history.push("/admin/saleslist");
-    } else {
-      if (!sale || sale._id !== saleId) {
-        dispatch(getSaleDetails(saleId));
-      } else {
-        setName(sale.name);
-        setCoupon(sale.couponCode);
-        setAmmount(sale.saleAmmount);
-        setIsActive(sale.isActive);
-        setPercentage(sale.salePercentage);
-        setStartsOn(sale.startsOn);
-        setEndsOn(sale.endsOn);
-      }
+    if (sale) {
+      setName(sale.name);
+      setCoupon(sale.couponCode);
+      setAmmount(sale.saleAmmount);
+      setIsActive(sale.isActive);
+      setPercentage(sale.salePercentage);
+      setStartsOn(sale.startsOn);
+      setEndsOn(sale.endsOn);
     }
-  }, [saleId, sale, dispatch, successUpdate, history]);
+  }, [sale]);
+
+  const updateSaleMut = useMutation(updateSale, {
+    onSuccess: (data, variables, context) => {
+      queryClient.refetchQueries("sales");
+      history.push(`/admin/saleslist`);
+    },
+  });
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -63,7 +60,7 @@ const SaleEditScreen = ({ history, match }) => {
       percentage,
       ammount,
     };
-    dispatch(updateSale(sale));
+    updateSaleMut.mutate({ token: userInfo.token, sale });
   };
 
   return (
@@ -73,13 +70,13 @@ const SaleEditScreen = ({ history, match }) => {
       </Link>
       <FormContainer>
         <h1>Edit Sale</h1>
-        {loadingUpdate && <Loader />}
-        {errorUpdate && <Message variant="danger">{errorUpdate}</Message>}
+        {updateSaleMut.isLoading && <Loader />}
+        {updateSaleMut.isError && <Message variant="danger">{isError}</Message>}
 
-        {loading ? (
+        {isLoading ? (
           <Loader />
-        ) : error ? (
-          <Message variant="danger">{error}</Message>
+        ) : isError ? (
+          <Message variant="danger">{error.message}</Message>
         ) : (
           <Form onSubmit={submitHandler}>
             <Col>

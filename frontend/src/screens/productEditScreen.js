@@ -1,13 +1,16 @@
-import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Form, Button } from "react-bootstrap";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import Message from "../components/Message";
 import Loader from "../components/Loader";
 import FormContainer from "../components/FormContainer";
-import { listProductDetails, updateProduct } from "../actions/productActions";
-import { PRODUCT_UPDATE_RESET } from "../constants/productConstants";
+import { useMutation, useQuery } from "react-query";
+import {
+  fetchProduct,
+  updateProduct,
+  uploadImage,
+} from "../services/productServices";
 
 const ProductEditScreen = ({ match, history }) => {
   const productId = match.params.id;
@@ -22,63 +25,48 @@ const ProductEditScreen = ({ match, history }) => {
   const [uploading, setUploading] = useState(false);
   const [validationError, setValidationError] = useState("");
 
-  const dispatch = useDispatch();
-
-  const productDetails = useSelector((state) => state.productDetails);
-  const { loading, error, product } = productDetails;
-
-  const productUpdate = useSelector((state) => state.productUpdate);
-  const {
-    loading: loadingUpdate,
-    error: errorUpdate,
-    success: successUpdate,
-  } = productUpdate;
-
+  const { data: product, isLoading, isError, error } = useQuery(
+    ["product", match.params.id],
+    fetchProduct
+  );
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
-  useEffect(() => {
-    if (successUpdate) {
-      dispatch({ type: PRODUCT_UPDATE_RESET });
+  const productUpdateMut = useMutation(updateProduct, {
+    onSuccess: (data, variable, con) => {
       history.push("/admin/productlist");
-    } else {
-      if (!product || product._id !== productId) {
-        dispatch(listProductDetails(productId));
-      } else {
-        setName(product.name);
-        setPrice(product.price);
-        setImage(product.image);
-        setBrand(product.brand);
-        setCategory(product.category);
-        setCountInStock(product.countInStock);
-        setDescription(product.description);
-      }
-    }
-  }, [dispatch, history, productId, product, successUpdate]);
+    },
+  });
 
-  const uploadFileHandler = async (e) => {
-    const file = e.target.files[0];
-    const formData = new FormData();
-    formData.append("image", file);
-    setUploading(true);
-    const token = userInfo.token;
-    try {
-      const config = {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-      };
-
-      const { data } = await axios.post("/api/upload", formData, config);
-
+  const uploadImageMut = useMutation(uploadImage, {
+    onMutate: () => {
+      setUploading(true);
+    },
+    onError: () => {
+      setUploading(false);
+    },
+    onSuccess: (data) => {
+      setUploading(false);
       setImage(data);
       setUploading(false);
-    } catch (error) {
-      console.error(error);
-      setUploading(false);
-    }
+    },
+  });
+
+  const uploadFileHandler = async (e) => {
+    const image = e.target.files[0];
+    uploadImageMut.mutate({ image, token: userInfo.token });
   };
+  useEffect(() => {
+    if (product) {
+      setName(product.name);
+      setPrice(product.price);
+      setImage(product.image);
+      setBrand(product.brand);
+      setCategory(product.category);
+      setCountInStock(product.countInStock);
+      setDescription(product.description);
+    }
+  }, [product]);
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -88,8 +76,8 @@ const ProductEditScreen = ({ match, history }) => {
       return;
     }
 
-    dispatch(
-      updateProduct({
+    productUpdateMut.mutate({
+      product: {
         _id: productId,
         name,
         price,
@@ -98,8 +86,9 @@ const ProductEditScreen = ({ match, history }) => {
         category,
         description,
         countInStock,
-      })
-    );
+      },
+      token: userInfo.token,
+    });
   };
 
   return (
@@ -109,15 +98,17 @@ const ProductEditScreen = ({ match, history }) => {
       </Link>
       <FormContainer>
         <h1>Edit Product</h1>
-        {loadingUpdate && <Loader />}
-        {errorUpdate && <Message variant="danger">{errorUpdate}</Message>}
+        {productUpdateMut.isLoading && <Loader />}
+        {productUpdateMut.isError && (
+          <Message variant="danger">{productUpdateMut.error.message}</Message>
+        )}
         {validationError && (
           <Message variant="danger">{validationError}</Message>
         )}
-        {loading ? (
+        {isLoading ? (
           <Loader />
-        ) : error ? (
-          <Message variant="danger">{error}</Message>
+        ) : isError ? (
+          <Message variant="danger">{error.message}</Message>
         ) : (
           <Form onSubmit={submitHandler}>
             <Form.Group controlId="name">

@@ -1,44 +1,40 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { LinkContainer } from "react-router-bootstrap";
 import { Table, Button } from "react-bootstrap";
-import { useDispatch, useSelector } from "react-redux";
-import { deleteUser, listUsers } from "../actions/userActions";
-
+import { useSelector } from "react-redux";
+import { useQuery, useMutation, useQueryClient } from "react-query";
 import Message from "../components/Message";
 import Loader from "../components/Loader";
+import { deleteUser, fetchUsers } from "../services/userService";
 
-const UserListScreen = ({ history }) => {
-  const dispatch = useDispatch();
-
-  const userList = useSelector((state) => state.userList);
-  const { loading, error, users } = userList;
-
+const UserListScreen = () => {
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
+  const queryClient = useQueryClient();
 
-  const userDelete = useSelector((state) => state.userDelete);
-  const { success: successDelete } = userDelete;
+  const userDeleteMut = useMutation(deleteUser, {
+    onSuccess: (data, variables, context) => {
+      queryClient.fetchQuery(["users", userInfo.token], fetchUsers);
+    },
+  });
 
-  useEffect(() => {
-    if (userInfo && userInfo.isAdmin) {
-      dispatch(listUsers());
-    } else {
-      history.push("/");
-    }
-  }, [dispatch, history, successDelete, userInfo]);
+  const { data: users, isLoading, isError, error } = useQuery(
+    ["users", userInfo.token],
+    fetchUsers
+  );
 
   const deleteHandler = (id) => {
     if (window.confirm("are you sure")) {
-      dispatch(deleteUser(id));
+      userDeleteMut.mutate({ id, token: userInfo.token });
     }
   };
   return (
     <>
       <h1>Users</h1>
-      {loading ? (
+      {isLoading ? (
         <Loader />
-      ) : error ? (
-        <Message variant="danger">{error}</Message>
+      ) : isError ? (
+        <Message variant="danger">{error.message}</Message>
       ) : (
         <Table>
           <thead>

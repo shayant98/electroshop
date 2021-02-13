@@ -10,18 +10,15 @@ import {
   Badge,
 } from "react-bootstrap";
 import Message from "../components/Message";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import CheckoutSteps from "../components/CheckoutSteps";
-import { createOrder } from "../actions/orderActions";
 import { Link } from "react-router-dom";
-import { emptyCart } from "../actions/cartActions";
-import { couponCodeCheck } from "../actions/saleActions";
-import { getUserDetails } from "../actions/userActions";
-import { SALE_COUPON_RESET } from "../constants/saleConstants";
+import { fetchProfile } from "../services/userService";
+import { useMutation, useQuery } from "react-query";
+import { createOrder } from "../services/orderService";
+import { fetchCoupon } from "../services/saleService";
 
 const PlaceOrderScreen = ({ history }) => {
-  const dispatch = useDispatch();
-
   const [coupon, setCoupon] = useState("");
   const [showCouponField, setShowCouponField] = useState(true);
   const [discount, setDiscount] = useState(0);
@@ -29,63 +26,43 @@ const PlaceOrderScreen = ({ history }) => {
   const cart = useSelector((state) => state.cart);
   const { cartItems, shippingAddress, paymentMethod } = cart;
 
-  if (!cart.shippingAddress.address) {
-    history.push("/shipping");
-  } else if (!cart.paymentMethod) {
-    history.push("/payment");
-  }
+  const userLogin = useSelector((state) => state.userLogin);
+  const { userInfo } = userLogin;
+
+  const { data: user, isFetched: userIsFetched } = useQuery(
+    ["profile", userInfo.token],
+    fetchProfile
+  );
+
+  const {
+    data: sale,
+    refetch,
+    isError: couponHasError,
+    error: couponError,
+    isSuccess: couponIsSuccess,
+  } = useQuery(["coupon", coupon, userInfo.token], fetchCoupon, {
+    enabled: true,
+  });
+
+  useEffect(() => {
+    if (!shippingAddress.address) {
+      history.push("/shipping");
+    } else if (!paymentMethod) {
+      history.push("/payment");
+    }
+  }, [shippingAddress, paymentMethod, history]);
 
   const itemsPrice = cartItems.reduce(
     (acc, item) => acc + item.price * item.qty,
     0
   );
 
-  const orderCreate = useSelector((state) => state.orderCreate);
-  const { success, error, order } = orderCreate;
-
-  const saleCouponCheck = useSelector((state) => state.saleCouponCheck);
-  const { success: successCoupon, error: errorCoupon, sale } = saleCouponCheck;
-
-  const userDetails = useSelector((state) => state.userDetails);
-  const { user } = userDetails;
+  const createOrderMut = useMutation(createOrder);
 
   const shippingPrice = itemsPrice > 100 ? 0 : 750;
   const taxPrice = Number(0.15 * itemsPrice).toFixed(2);
   const totalPrice =
     Number(itemsPrice) + Number(shippingPrice) + Number(taxPrice);
-
-  useEffect(() => {
-    dispatch({ type: SALE_COUPON_RESET });
-    if (success) {
-      dispatch(emptyCart());
-      history.push(`/order/${order._id}`);
-    }
-    if (successCoupon) {
-      setShowCouponField(false);
-
-      if (sale.salePercentage && sale.salePercentage !== 0) {
-        setDiscount(
-          (totalPrice - totalPrice * (sale.salePercentage / 100)).toFixed(2)
-        );
-      } else {
-        setDiscount(sale.saleAmmount);
-      }
-      computeOrderPrice();
-    }
-
-    if (!user.name) {
-      dispatch(getUserDetails("profile"));
-    }
-  }, [
-    dispatch,
-    success,
-    order,
-    history,
-    successCoupon,
-    sale,
-    totalPrice,
-    user,
-  ]);
 
   const computeOrderPrice = () => {
     return (
@@ -100,32 +77,50 @@ const PlaceOrderScreen = ({ history }) => {
     e.preventDefault();
 
     if (e.target.value.trim().length > 0) {
-      dispatch(couponCodeCheck(e.target.value.toUpperCase()));
+      refetch();
+      if (couponIsSuccess) {
+        setShowCouponField(false);
+
+        if (sale.salePercentage && sale.salePercentage !== 0) {
+          setDiscount(
+            (totalPrice - totalPrice * (sale.salePercentage / 100)).toFixed(2)
+          );
+        } else {
+          setDiscount(sale.saleAmmount);
+        }
+        computeOrderPrice();
+      }
     }
   };
 
   const placeorderHandler = () => {
-    dispatch(
-      createOrder({
-        orderItems: cartItems,
-        shippingAddress,
-        paymentMethod,
-        shippingPrice,
-        taxPrice,
-        totalPrice,
-      })
+    const order = {
+      orderItems: cartItems,
+      shippingAddress,
+      paymentMethod,
+      shippingPrice,
+      taxPrice,
+      totalPrice,
+    };
+
+    createOrderMut.mutate(
+      { token: userInfo.token, order },
+      {
+        onSuccess: (data) => {
+          history.push(`/order/${data._id}`);
+        },
+      }
     );
   };
 
   const removeCouponHander = () => {
-    dispatch({ type: SALE_COUPON_RESET });
     setDiscount(0);
     setShowCouponField(true);
   };
 
   return (
     <>
-      {user.name && !user.isVerified && (
+      {userIsFetched && !user.isVerified && (
         <Message variant="danger">
           Please Verify your account to place purchase
         </Message>
@@ -218,9 +213,13 @@ const PlaceOrderScreen = ({ history }) => {
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
-                {error && <Message variant="danger">{error}</Message>}
-                {errorCoupon && (
-                  <Message variant="danger">{errorCoupon}</Message>
+                {createOrderMut.isError && (
+                  <Message variant="danger">
+                    {createOrderMut.error.message}
+                  </Message>
+                )}
+                {couponHasError && (
+                  <Message variant="danger">{couponError.message}</Message>
                 )}
                 {!showCouponField && (
                   <Badge pill variant="primary">
@@ -249,7 +248,9 @@ const PlaceOrderScreen = ({ history }) => {
                 <Button
                   type="button"
                   className="btn-block"
-                  disabled={cartItems === 0 || !user.isVerified}
+                  disabled={
+                    cartItems === 0 || (userIsFetched && !user.isVerified)
+                  }
                   onClick={placeorderHandler}
                 >
                   Place Order

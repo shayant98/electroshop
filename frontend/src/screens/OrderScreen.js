@@ -1,68 +1,60 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Row, Col, ListGroup, Image, Card, Button } from "react-bootstrap";
 import Message from "../components/Message";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
+import { useQuery, useMutation, useQueryClient } from "react-query";
 import Loader from "../components/Loader";
-import {
-  deliverOrder,
-  getOrderDetails,
-  payOrder,
-} from "../actions/orderActions";
+
 import { Link } from "react-router-dom";
 import { PayPalButton } from "react-paypal-button-v2";
-import axios from "axios";
+
 import {
-  ORDER_DELIVER_RESET,
-  ORDER_PAY_RESET,
-} from "../constants/orderConstants";
+  fetchOrder,
+  markOrderAsDeliverd,
+  markOrderAsPaid,
+} from "../services/orderService";
+import { fetchPayPalToken } from "../services/saleService";
 
 const OrderScreen = ({ match }) => {
-  const [sdkReady, setSdkReady] = useState(false);
-
-  const dispatch = useDispatch();
-
   const orderId = match.params.id;
-  console.log(orderId);
-
-  const orderDetails = useSelector((state) => state.orderDetails);
-  const { order, loading, error } = orderDetails;
+  const queryClient = useQueryClient();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
-  const orderPay = useSelector((state) => state.orderPay);
-  const { loading: loadingPay, success: successPay } = orderPay;
+  const payOrderMut = useMutation(markOrderAsPaid, {
+    onSuccess: (data) => {
+      queryClient.fetchQuery(["order", orderId, userInfo.token], fetchOrder);
+    },
+  });
 
-  const orderDeliver = useSelector((state) => state.orderDeliver);
-  const { success: successDeliver } = orderDeliver;
+  const deliverOrderMut = useMutation(markOrderAsDeliverd, {
+    onSuccess: (data) => {
+      queryClient.fetchQuery(["order", orderId, userInfo.token], fetchOrder);
+    },
+  });
+  const { data: order, isError, error, isLoading: orderIsLoading } = useQuery(
+    ["order", orderId, userInfo.token],
+    fetchOrder
+  );
+  const { data: clientId, isFetched, isSuccess } = useQuery(
+    "paypal",
+    fetchPayPalToken
+  );
 
-  useEffect(() => {
-    const addPayPalScript = async () => {
-      const { data: clientId } = await axios.get("/api/config/paypal");
-      const script = document.createElement("script");
-      script.type = "text/javascript";
-      script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}`;
-      script.async = true;
-      script.onload = () => {
-        setSdkReady(true);
-      };
-      document.body.appendChild(script);
-    };
+  const addPayPalScript = (clientId) => {
+    const script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}`;
+    script.async = true;
+    document.body.appendChild(script);
+  };
 
-    if (!order || successPay || order._id !== orderId || successDeliver) {
-      dispatch({ type: ORDER_PAY_RESET });
-      dispatch({ type: ORDER_DELIVER_RESET });
-      dispatch(getOrderDetails(orderId));
-    } else if (!order.isPaid) {
-      if (!window.paypal) {
-        addPayPalScript();
-      } else {
-        setSdkReady(true);
-      }
-    }
-  }, [dispatch, orderId, successPay, successDeliver, order]);
+  if (!window.paypal && isFetched && isSuccess) {
+    addPayPalScript(clientId);
+  }
 
-  if (!loading && order) {
+  if (!orderIsLoading && order) {
     order.itemsPrice = order.orderItems.reduce(
       (acc, item) => acc + item.price * item.qty,
       0
@@ -70,17 +62,20 @@ const OrderScreen = ({ match }) => {
   }
 
   const successPaymentHandler = (paymentResult) => {
-    dispatch(payOrder(orderId, paymentResult));
+    payOrderMut.mutate({ id: orderId, paymentResult, token: userInfo.token });
   };
 
   const deliverHandler = () => {
-    dispatch(deliverOrder(order._id));
+    deliverOrderMut.mutate({
+      id: orderId,
+      token: userInfo.token,
+    });
   };
 
-  return loading ? (
+  return orderIsLoading ? (
     <Loader />
-  ) : error ? (
-    <Message variant="danger">{error}</Message>
+  ) : isError ? (
+    <Message variant="danger">{error.message}</Message>
   ) : (
     <>
       <h1> Order {order._id}</h1>
@@ -191,8 +186,8 @@ const OrderScreen = ({ match }) => {
           </Card>
           {!order.isPaid && userInfo._id === order.user._id && (
             <Col className="mt-3">
-              {loadingPay && <Loader />}
-              {!sdkReady ? (
+              {payOrderMut.isLoading && <Loader />}
+              {!isSuccess ? (
                 <Loader />
               ) : (
                 <>

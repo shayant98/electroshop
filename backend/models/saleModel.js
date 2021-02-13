@@ -30,7 +30,6 @@ const saleModel = mongoose.Schema(
     couponCode: {
       type: String,
       required: true,
-      unique: true,
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,

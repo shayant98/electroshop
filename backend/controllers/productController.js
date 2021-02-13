@@ -6,7 +6,7 @@ const Product = require("../models/productModel");
 // @route GET /api/products
 // @access Public
 const getProducts = asyncHandler(async (req, res, next) => {
-  const pageSize = 10;
+  const pageSize = 2;
   const page = Number(req.query.pageNumber) || 1;
   const keyword = req.query.keyword
     ? {
@@ -148,7 +148,11 @@ const createProductReview = asyncHandler(async (req, res, next) => {
       product.reviews.reduce((acc, item) => item.rating + acc, 0) /
       product.reviews.length;
 
-    await product.save();
+    try {
+      await product.save();
+    } catch (error) {
+      throw new Error("Unable to add review");
+    }
     res.status(201).json({ message: "Review added" });
   } else {
     res.status(404);
